@@ -15,14 +15,14 @@ public class UserService {
 
     public User getUserByEmailAndPassword(String email, String password) {
         String sql = "SELECT u.*, m.id_member, m.no_sim, p.id_pegawai, j.nama_jabatan " +
-                     "FROM Users u " +
-                     "LEFT JOIN Member m ON u.id_user = m.id_user " +
-                     "LEFT JOIN Pegawai p ON u.id_user = p.id_user " +
-                     "LEFT JOIN Jabatan j ON p.id_jabatan = j.id_jabatan " +
-                     "WHERE u.email = ? AND u.password = ?";
+                "FROM Users u " +
+                "LEFT JOIN Member m ON u.id_user = m.id_user " +
+                "LEFT JOIN Pegawai p ON u.id_user = p.id_user " +
+                "LEFT JOIN Jabatan j ON p.id_jabatan = j.id_jabatan " +
+                "WHERE u.email = ? AND u.password = ?";
 
         try (Connection conn = SQLDatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, email);
             stmt.setString(2, password);
@@ -51,17 +51,16 @@ public class UserService {
                 }
 
                 return new User(
-                    rs.getInt("id_user"),
-                    idMem,
-                    idPeg,
-                    rs.getString("nama"),
-                    rs.getString("email"),
-                    rs.getString("password"),
-                    rs.getString("no_telp"),
-                    rs.getString("alamat"),
-                    rs.getString("no_sim") != null ? rs.getString("no_sim") : "-",
-                    role
-                );
+                        rs.getInt("id_user"),
+                        idMem,
+                        idPeg,
+                        rs.getString("nama"),
+                        rs.getString("email"),
+                        rs.getString("password"),
+                        rs.getString("no_telp"),
+                        rs.getString("alamat"),
+                        rs.getString("no_sim") != null ? rs.getString("no_sim") : "-",
+                        role);
             }
 
         } catch (SQLException e) {
@@ -73,13 +72,30 @@ public class UserService {
 
     public boolean registerMember(Member member) {
 
+        // Email must be gmail
+        if (!member.getEmail().toLowerCase().endsWith("@gmail.com")) {
+            throw new IllegalArgumentException(
+                    "Email harus menggunakan @gmail.com");
+        }
+
+        // Password minimum 8 chars
+        if (member.getPassword().length() < 8) {
+            throw new IllegalArgumentException(
+                    "Password minimal 8 karakter");
+        }
+
+        // Check duplicate email
+        if (emailExists(member.getEmail())) {
+            throw new IllegalArgumentException(
+                    "Email sudah terdaftar");
+        }
         String sqlUser = "INSERT INTO Users " +
-                         "(id_user, nama, email, no_telp, alamat, password) " +
-                         "VALUES (?, ?, ?, ?, ?, ?)";
+                "(id_user, nama, email, no_telp, alamat, password) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
 
         String sqlMember = "INSERT INTO Member " +
-                           "(id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status) " +
-                           "VALUES (?, ?, ?, GETDATE(), 'Aktif')";
+                "(id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status) " +
+                "VALUES (?, ?, ?, GETDATE(), 'Aktif')";
 
         Connection conn = null;
 
@@ -140,14 +156,14 @@ public class UserService {
         ArrayList<User> list = new ArrayList<>();
 
         String sql = "SELECT u.*, m.id_member, m.no_sim, p.id_pegawai, j.nama_jabatan " +
-                     "FROM Users u " +
-                     "LEFT JOIN Member m ON u.id_user = m.id_user " +
-                     "LEFT JOIN Pegawai p ON u.id_user = p.id_user " +
-                     "LEFT JOIN Jabatan j ON p.id_jabatan = j.id_jabatan";
+                "FROM Users u " +
+                "LEFT JOIN Member m ON u.id_user = m.id_user " +
+                "LEFT JOIN Pegawai p ON u.id_user = p.id_user " +
+                "LEFT JOIN Jabatan j ON p.id_jabatan = j.id_jabatan";
 
         try (Connection conn = SQLDatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Role role = null;
@@ -168,17 +184,16 @@ public class UserService {
 
                 if (role == targetRole) {
                     list.add(new User(
-                        rs.getInt("id_user"),
-                        idMem,
-                        idPeg,
-                        rs.getString("nama"),
-                        rs.getString("email"),
-                        rs.getString("password"),
-                        rs.getString("no_telp"),
-                        rs.getString("alamat"),
-                        rs.getString("no_sim") != null ? rs.getString("no_sim") : "-",
-                        role
-                    ));
+                            rs.getInt("id_user"),
+                            idMem,
+                            idPeg,
+                            rs.getString("nama"),
+                            rs.getString("email"),
+                            rs.getString("password"),
+                            rs.getString("no_telp"),
+                            rs.getString("alamat"),
+                            rs.getString("no_sim") != null ? rs.getString("no_sim") : "-",
+                            role));
                 }
             }
 
@@ -193,7 +208,7 @@ public class UserService {
         String sql = "DELETE FROM Users WHERE email = ?";
 
         try (Connection conn = SQLDatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, email);
 
@@ -209,7 +224,7 @@ public class UserService {
         String sql = "SELECT MAX(id_user) FROM Users";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                ResultSet rs = stmt.executeQuery()) {
 
             if (rs.next()) {
                 return rs.getInt(1) + 1;
@@ -217,5 +232,23 @@ public class UserService {
         }
 
         return 1;
+    }
+
+    public boolean emailExists(String email) {
+        String sql = "SELECT 1 FROM Users WHERE email = ?";
+
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }
