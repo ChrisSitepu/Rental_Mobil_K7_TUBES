@@ -20,13 +20,16 @@ public class TransaksiService {
                                "VALUES (?, ?, ?, ?, 'DIPINJAM', ?, ?, ?, GETDATE(), ?)";
         
         String sqlUpdateMobil = "UPDATE Mobil SET status = 'Dipinjam' WHERE id_mobil = ?";
+        
+        String sqlPembayaran = "INSERT INTO Pembayaran (id_pembayaran, id_transaksi, waktu_pembayaran, status, jumlah, Metode) " +
+                               "VALUES (?, ?, GETDATE(), 'LUNAS', ?, 'Tunai')";
 
         Connection conn = null;
         try {
             conn = SQLDatabaseConnection.getConnection();
             conn.setAutoCommit(false);
 
-            int nextId = getNextTransaksiId(conn);
+            int nextId = getNextId(conn, "SELECT MAX(id_transaksi) FROM Peminjaman");
             double biayaSewa = mobil.getTarifSewa();
             double total = biayaSewa * totalHariSewa;
             LocalDateTime rencanaKembali = LocalDateTime.now().plusDays(totalHariSewa);
@@ -48,6 +51,14 @@ public class TransaksiService {
                 stmtUpdate.executeUpdate();
             }
 
+            int nextIdBayar = getNextId(conn, "SELECT MAX(id_pembayaran) FROM Pembayaran");
+            try (PreparedStatement stmtBayar = conn.prepareStatement(sqlPembayaran)) {
+                stmtBayar.setInt(1, nextIdBayar);
+                stmtBayar.setInt(2, nextId);
+                stmtBayar.setDouble(3, total);
+                stmtBayar.executeUpdate();
+            }
+
             conn.commit();
             return true;
         } catch (SQLException e) {
@@ -61,17 +72,6 @@ public class TransaksiService {
                 try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
             }
         }
-    }
-
-    private int getNextTransaksiId(Connection conn) throws SQLException {
-        String sql = "SELECT MAX(id_transaksi) FROM Peminjaman";
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1) + 1;
-            }
-        }
-        return 1;
     }
 
     public ArrayList<Transaksi> getAllActivePeminjaman() {

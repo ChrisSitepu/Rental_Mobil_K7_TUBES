@@ -3,8 +3,8 @@ package model;
 public class User {
 
     private int idUser;
-    private int idMember;
-    private int idPegawai;
+    
+    
     private String nama;
     private String email;
     private String password;
@@ -12,6 +12,12 @@ public class User {
     private String alamat;
     private String noSim;
     private Role role;
+
+
+    private int idPegawai;
+
+
+    private int idMember;
 
     public User(
             int idUser,

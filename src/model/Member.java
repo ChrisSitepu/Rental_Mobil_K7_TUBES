@@ -16,6 +16,7 @@ public class Member extends User {
             LocalDate tanggalBerlakuSim
     ) {
         super(
+                0, 0, 0, // idUser, idMember, idPegawai dummy for new registration
                 nama,
                 email,
                 password,

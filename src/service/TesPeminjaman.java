@@ -14,7 +14,7 @@ public class TesPeminjaman {
         // 1. Ambil user member (id_member: 1, id_user: 1)
         // Kita simulasikan user yang sudah login
         User dummyMember = new User(
-            1, 1, "Dodo", "dodo@gmail.com", "123", "0812345662", "Bandung", "B123456", Role.MEMBER
+            1, 1, 0, "Dodo", "dodo@gmail.com", "123", "0812345662", "Bandung", "B123456", Role.MEMBER
         );
 
         // 2. Ambil mobil yang tersedia

@@ -26,10 +26,12 @@ public class UserService {
 
             stmt.setString(1, email);
             stmt.setString(2, password);
+
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
                 Role role = null;
+
                 String jab = rs.getString("nama_jabatan");
                 int idMem = rs.getInt("id_member");
                 int idPeg = rs.getInt("id_pegawai");
@@ -61,23 +63,31 @@ public class UserService {
                     role
                 );
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return null;
     }
 
     public boolean registerMember(Member member) {
-        String sqlUser = "INSERT INTO Users (id_user, nama, email, no_telp, alamat, password) VALUES (?, ?, ?, ?, ?, ?)";
-        String sqlMember = "INSERT INTO Member (id_member, id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status) VALUES (?, ?, ?, ?, GETDATE(), 'Aktif')";
+
+        String sqlUser = "INSERT INTO Users " +
+                         "(id_user, nama, email, no_telp, alamat, password) " +
+                         "VALUES (?, ?, ?, ?, ?, ?)";
+
+        String sqlMember = "INSERT INTO Member " +
+                           "(id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status) " +
+                           "VALUES (?, ?, ?, GETDATE(), 'Aktif')";
 
         Connection conn = null;
+
         try {
             conn = SQLDatabaseConnection.getConnection();
             conn.setAutoCommit(false);
 
             int nextUserId = getNextUserId(conn);
-            int nextMemberId = getNextMemberId(conn);
 
             try (PreparedStatement stmtUser = conn.prepareStatement(sqlUser)) {
                 stmtUser.setInt(1, nextUserId);
@@ -86,34 +96,49 @@ public class UserService {
                 stmtUser.setString(4, member.getNomorTelepon());
                 stmtUser.setString(5, member.getAlamat());
                 stmtUser.setString(6, member.getPassword());
+
                 stmtUser.executeUpdate();
             }
 
             try (PreparedStatement stmtMember = conn.prepareStatement(sqlMember)) {
-                stmtMember.setInt(1, nextMemberId);
-                stmtMember.setInt(2, nextUserId);
-                stmtMember.setString(3, member.getNoSim());
-                stmtMember.setDate(4, java.sql.Date.valueOf(member.getTanggalBerlakuSim()));
+                stmtMember.setInt(1, nextUserId);
+                stmtMember.setString(2, member.getNoSim());
+                stmtMember.setDate(3, java.sql.Date.valueOf(member.getTanggalBerlakuSim()));
+
                 stmtMember.executeUpdate();
             }
 
             conn.commit();
             return true;
+
         } catch (SQLException e) {
             e.printStackTrace();
+
             if (conn != null) {
-                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
+
             return false;
+
         } finally {
             if (conn != null) {
-                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
 
     public ArrayList<User> getAllByRole(Role targetRole) {
         ArrayList<User> list = new ArrayList<>();
+
         String sql = "SELECT u.*, m.id_member, m.no_sim, p.id_pegawai, j.nama_jabatan " +
                      "FROM Users u " +
                      "LEFT JOIN Member m ON u.id_user = m.id_user " +
@@ -126,6 +151,7 @@ public class UserService {
 
             while (rs.next()) {
                 Role role = null;
+
                 String jab = rs.getString("nama_jabatan");
                 int idMem = rs.getInt("id_member");
                 int idPeg = rs.getInt("id_pegawai");
@@ -155,18 +181,24 @@ public class UserService {
                     ));
                 }
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return list;
     }
 
     public boolean deleteUserByEmail(String email) {
         String sql = "DELETE FROM Users WHERE email = ?";
+
         try (Connection conn = SQLDatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, email);
+
             return stmt.executeUpdate() > 0;
+
         } catch (SQLException e) {
             System.out.println("Gagal menghapus: pastikan data member/pegawai terkait sudah dihapus.");
             return false;
@@ -175,23 +207,15 @@ public class UserService {
 
     private int getNextUserId(Connection conn) throws SQLException {
         String sql = "SELECT MAX(id_user) FROM Users";
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1) + 1;
-            }
-        }
-        return 1;
-    }
 
-    private int getNextMemberId(Connection conn) throws SQLException {
-        String sql = "SELECT MAX(id_member) FROM Member";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
+
             if (rs.next()) {
                 return rs.getInt(1) + 1;
             }
         }
+
         return 1;
     }
 }

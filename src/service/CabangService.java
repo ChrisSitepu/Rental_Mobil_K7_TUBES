@@ -1,30 +1,37 @@
 package service;
 
-import java.util.ArrayList;
-
+import config.SQLDatabaseConnection;
 import model.Cabang;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalTime;
+import java.util.ArrayList;
 
 public class CabangService {
 
-    private static ArrayList<Cabang> cabangList =
-            new ArrayList<>();
+    public ArrayList<Cabang> getAllCabang() {
+        ArrayList<Cabang> list = new ArrayList<>();
+        String sql = "SELECT * FROM Cabang";
 
-    static {
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
-        cabangList.add(
-                new Cabang("Bandung")
-        );
-
-        cabangList.add(
-                new Cabang("Jakarta")
-        );
-
-        cabangList.add(
-                new Cabang("Surabaya")
-        );
-    }
-
-    public ArrayList<Cabang> getAllCabang(){
-        return cabangList;
+            while (rs.next()) {
+                list.add(new Cabang(
+                        rs.getInt("id_cabang"),
+                        rs.getString("nama"),
+                        rs.getTime("jam_operasional").toLocalTime(),
+                        rs.getString("email"),
+                        rs.getString("no_telepon"),
+                        rs.getString("alamat")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

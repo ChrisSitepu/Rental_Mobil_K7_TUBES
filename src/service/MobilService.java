@@ -22,15 +22,12 @@ public class MobilService {
                 list.add(new Mobil(
                         rs.getInt("id_mobil"),
                         rs.getInt("id_cabang"),
-                        rs.getString("brand") + " " + rs.getString("tipe"),
                         rs.getString("brand"),
                         rs.getString("tipe"),
                         rs.getString("warna"),
                         rs.getString("no_plat"),
                         rs.getInt("kapasitas"),
                         rs.getInt("tahun_pembuatan"),
-                        300000, 
-                        50000,  
                         rs.getString("status").equalsIgnoreCase("Tersedia")
                 ));
             }

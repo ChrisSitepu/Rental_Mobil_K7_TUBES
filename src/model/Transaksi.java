@@ -36,6 +36,11 @@ public class Transaksi {
         this.waktuRencanaPengembalian = waktuRencanaPengembalian;
     }
 
+    public Transaksi(String string, String string2, int i, String string3, String string4, String string5,
+            String string6, String string7, String string8) {
+        //TODO Auto-generated constructor stub
+    }
+
     // Getters and Setters
     public int getIdTransaksi() { return idTransaksi; }
     public int getIdMobil() { return idMobil; }
