@@ -1,0 +1,83 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "TesPeminjaman",
+            "request": "launch",
+            "mainClass": "service.TesPeminjaman",
+            "projectName": "TUBES_703f828e"
+        },
+        {
+            "type": "java",
+            "name": "SQLDatabaseConnection",
+            "request": "launch",
+            "mainClass": "config.SQLDatabaseConnection",
+            "projectName": "TUBES_703f828e"
+        },
+        {
+            "type": "java",
+            "name": "TesMobil",
+            "request": "launch",
+            "mainClass": "service.TesMobil",
+            "projectName": "TUBES_703f828e"
+        },
+        {
+            "type": "java",
+            "name": "App",
+            "request": "launch",
+            "mainClass": "App",
+            "projectName": "TUBES_703f828e"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "TUBES_703f828e"
+        },
+        {
+            "type": "java",
+            "name": "TesMobil",
+            "request": "launch",
+            "mainClass": "service.TesMobil",
+            "projectName": "TUBES_96b02a0"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "TUBES_96b02a0"
+        },
+        {
+            "type": "java",
+            "name": "MainCof",
+            "request": "launch",
+            "mainClass": "config.MainCof",
+            "projectName": "TUBES_96b02a0"
+        },
+        {
+            "type": "java",
+            "name": "SQLDatabaseConnection",
+            "request": "launch",
+            "mainClass": "config.SQLDatabaseConnection",
+            "projectName": "TUBES_96b02a0"
+        }
+    ]
+} // {
+//     "version": "0.2.0",
+//     "configurations": [
+//         {
+//             "type": "java",
+//             "name": "Java - SQL Connection",
+//             "request": "launch",
+//             "mainClass": "config.SQLDatabaseConnection",
+//             "cwd": "${workspaceFolder}",
+//             "vmArgs": "-Djava.library.path=${workspaceFolder}/lib/sqljdbc_13.4/enu/auth/x64 --enable-native-access=ALL-UNNAMED",
+//             "classPaths": [
+//                 "${workspaceFolder}/bin",
+//                 "${workspaceFolder}/lib/sqljdbc_13.4/enu/jars/mssql-jdbc-13.4.0.jre11.jar"
+//             ]
+//         }
+//     ]
+// }
