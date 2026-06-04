@@ -190,7 +190,52 @@ public class TransaksiService {
     }
 
     public ArrayList<Transaksi> getTransaksiAktif(User user) {
-        // This can be updated later to fetch from DB if needed
-        return new ArrayList<>();
+
+    ArrayList<Transaksi> list = new ArrayList<>();
+
+    String sql =
+        "SELECT p.*, " +
+        "m.brand + ' ' + m.tipe AS nama_mobil, " +
+        "m.no_plat " +
+        "FROM Peminjaman p " +
+        "JOIN Mobil m ON p.id_mobil = m.id_mobil " +
+        "WHERE p.id_member = ? " +
+        "AND p.status = 'DIPINJAM'";
+
+    try (
+        Connection conn = SQLDatabaseConnection.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)
+    ) {
+
+        stmt.setInt(1, user.getIdMember());
+
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next()) {
+
+            Transaksi t = new Transaksi(
+                rs.getInt("id_transaksi"),
+                rs.getInt("id_mobil"),
+                rs.getInt("id_cabang"),
+                rs.getInt("id_member"),
+                rs.getString("status"),
+                rs.getInt("total_hari_sewa"),
+                rs.getInt("biaya_sewa"),
+                rs.getInt("total"),
+                rs.getTimestamp("waktu_pinjam").toLocalDateTime(),
+                rs.getTimestamp("waktu_rencana_pengembalian").toLocalDateTime()
+            );
+
+            t.setNamaMobil(rs.getString("nama_mobil"));
+            t.setPlatMobil(rs.getString("no_plat"));
+
+            list.add(t);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+
+    return list;
+}
 }
