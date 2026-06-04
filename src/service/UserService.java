@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class UserService {
@@ -71,20 +72,41 @@ public class UserService {
     }
 
     public boolean registerMember(Member member) {
-
-        // Email must be gmail
+        if (member.getNama().trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Nama tidak boleh kosong");
+        }
+        if (member.getAlamat().trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Alamat tidak boleh kosong");
+        }
         if (!member.getEmail().toLowerCase().endsWith("@gmail.com")) {
             throw new IllegalArgumentException(
                     "Email harus menggunakan @gmail.com");
         }
 
-        // Password minimum 8 chars
         if (member.getPassword().length() < 8) {
             throw new IllegalArgumentException(
                     "Password minimal 8 karakter");
         }
 
-        // Check duplicate email
+        if (!member.getNomorTelepon().matches("\\d+")) {
+            throw new IllegalArgumentException(
+                    "Nomor telepon hanya boleh berisi angka");
+        }
+
+        if (member.getNomorTelepon().length() < 10 ||
+                member.getNomorTelepon().length() > 15) {
+
+            throw new IllegalArgumentException(
+                    "Nomor telepon harus 10-15 digit");
+        }
+
+        if (!member.getTanggalBerlakuSim().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException(
+                    "SIM sudah tidak berlaku");
+        }
+
         if (emailExists(member.getEmail())) {
             throw new IllegalArgumentException(
                     "Email sudah terdaftar");
