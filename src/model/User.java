@@ -42,6 +42,26 @@ public class User {
         this.noSim = noSim;
         this.role = role;
     }
+    public User(
+        String nama,
+        String email,
+        String password,
+        String nomorTelepon,
+        String alamat,
+        String noSim,
+        Role role
+) {
+    this.idUser = 0;
+    this.idMember = 0;
+    this.idPegawai = 0;
+    this.nama = nama;
+    this.email = email;
+    this.password = password;
+    this.nomorTelepon = nomorTelepon;
+    this.alamat = alamat;
+    this.noSim = noSim;
+    this.role = role;
+}
 
     public int getIdUser() {
         return idUser;

@@ -45,22 +45,23 @@ public class SignUpMenu {
         }
 
         Member newUser = new Member(
-            nama,
-            email,
-            password,
-            no_hp,
-            alamat,
-            sim,
-            tanggalSim
-        );
+                nama,
+                email,
+                password,
+                no_hp,
+                alamat,
+                sim,
+                tanggalSim);
 
-        if (userService.registerMember(newUser)) {
-            System.out.println("\nRegistrasi berhasil untuk " + nama + "!");
-            System.out.println("Akun member Anda telah aktif.");
-        } else {
-            System.out.println("\nRegistrasi gagal! Silakan coba lagi.");
+        try {
+            if (userService.registerMember(newUser)) {
+                System.out.println("\nRegistrasi berhasil untuk " + nama + "!");
+                System.out.println("Akun member Anda telah aktif.");
+            } else {
+                System.out.println("\nRegistrasi gagal! Silakan coba lagi.");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
         }
-
-        System.out.println("Kembali ke login...");
     }
 }
