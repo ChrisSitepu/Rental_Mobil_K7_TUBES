@@ -67,33 +67,45 @@ public class UserService {
         return null;
     }
 
-    public boolean registerMember(Member member) {
-        String sqlUser = "INSERT INTO Users (id_user, nama, email, no_telp, alamat, password) VALUES (?, ?, ?, ?, ?, ?)";
-        String sqlMember = "INSERT INTO Member (id_member, id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status) VALUES (?, ?, ?, ?, GETDATE(), 'Aktif')";
+   public boolean registerMember(User user) {
 
-        Connection conn = null;
-        try {
-            conn = SQLDatabaseConnection.getConnection();
+        if (!user.getEmail().matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
+            throw new IllegalArgumentException(
+                    "Email harus menggunakan @gmail.com");
+        }
+
+        if (emailExists(user.getEmail())) {
+            throw new IllegalArgumentException(
+                    "Email sudah terdaftar");
+        }
+
+        if (user.getPassword().length() < 8) {
+            throw new IllegalArgumentException(
+                    "Password minimal 8 karakter");
+        }
+        
+        String sqlUser = "INSERT INTO Users (id_user, nama, email, no_telp, alamat, password) VALUES (?, ?, ?, ?, ?, ?)";
+        String sqlMember = "INSERT INTO Member (id_member, id_user, no_sim, tanggal_daftar, status) VALUES (?, ?, ?, GETDATE(), 'Aktif')";
+
+        try (Connection conn = SQLDatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
 
-            int nextUserId = getNextUserId(conn);
-            int nextMemberId = getNextMemberId(conn);
+            int nextId = getNextUserId(conn);
 
             try (PreparedStatement stmtUser = conn.prepareStatement(sqlUser)) {
-                stmtUser.setInt(1, nextUserId);
-                stmtUser.setString(2, member.getNama());
-                stmtUser.setString(3, member.getEmail());
-                stmtUser.setString(4, member.getNomorTelepon());
-                stmtUser.setString(5, member.getAlamat());
-                stmtUser.setString(6, member.getPassword());
+                stmtUser.setInt(1, nextId);
+                stmtUser.setString(2, user.getNama());
+                stmtUser.setString(3, user.getEmail());
+                stmtUser.setString(4, user.getNomorTelepon());
+                stmtUser.setString(5, user.getAlamat());
+                stmtUser.setString(6, user.getPassword());
                 stmtUser.executeUpdate();
             }
 
             try (PreparedStatement stmtMember = conn.prepareStatement(sqlMember)) {
-                stmtMember.setInt(1, nextMemberId);
-                stmtMember.setInt(2, nextUserId);
-                stmtMember.setString(3, member.getNoSim());
-                stmtMember.setDate(4, java.sql.Date.valueOf(member.getTanggalBerlakuSim()));
+                stmtMember.setInt(1, nextId);
+                stmtMember.setInt(2, nextId);
+                stmtMember.setString(3, user.getNoSim());
                 stmtMember.executeUpdate();
             }
 
@@ -101,14 +113,7 @@ public class UserService {
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
-            if (conn != null) {
-                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
-            }
             return false;
-        } finally {
-            if (conn != null) {
-                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
-            }
         }
     }
 
@@ -193,5 +198,22 @@ public class UserService {
             }
         }
         return 1;
+    }
+    public boolean emailExists(String email) {
+        String sql = "SELECT 1 FROM Users WHERE email = ?";
+
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }
