@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "Rental_Mobil_K7_TUBES_3276abb9"
+        },
+        {
+            "type": "java",
             "name": "TesPeminjaman",
             "request": "launch",
             "mainClass": "service.TesPeminjaman",
