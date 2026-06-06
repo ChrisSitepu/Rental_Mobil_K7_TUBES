@@ -15,20 +15,20 @@ public class PeminjamanMenu {
     private MobilService mobilService = new MobilService();
     private TransaksiService transaksiService = new TransaksiService();
 
-    public PeminjamanMenu(User user){
+    public PeminjamanMenu(User user) {
         this.user = user;
     }
 
-    public void show(){
+    public void show() {
         System.out.println("\n=== KATALOG MOBIL ===");
         ArrayList<Mobil> mobilList = mobilService.getAvailableMobil();
 
-        if(mobilList.isEmpty()){
+        if (mobilList.isEmpty()) {
             System.out.println("Tidak ada mobil tersedia!");
             return;
         }
 
-        for(int i = 0; i < mobilList.size(); i++){
+        for (int i = 0; i < mobilList.size(); i++) {
             Mobil m = mobilList.get(i);
             System.out.println((i + 1) + ". " + m.getNama() + " | " + m.getBrand() + " | Rp" + m.getTarifSewa());
         }
@@ -36,7 +36,7 @@ public class PeminjamanMenu {
         System.out.print("\nPilih nomor mobil: ");
         try {
             int pilih = Integer.parseInt(sc.nextLine());
-            if(pilih < 1 || pilih > mobilList.size()){
+            if (pilih < 1 || pilih > mobilList.size()) {
                 System.out.println("Pilihan tidak valid!");
                 return;
             }
@@ -46,7 +46,7 @@ public class PeminjamanMenu {
         }
     }
 
-    private void showDetailMobil(Mobil mobil){
+    private void showDetailMobil(Mobil mobil) {
         System.out.println("\n=== DETAIL MOBIL ===");
         System.out.println("Nama Mobil      : " + mobil.getNama());
         System.out.println("Brand           : " + mobil.getBrand());
@@ -57,7 +57,8 @@ public class PeminjamanMenu {
         System.out.println("Tahun           : " + mobil.getTahunPembuatan());
         System.out.println("Status          : " + (mobil.isAvailable() ? "Tersedia" : "Tidak Tersedia"));
         System.out.println("Tarif Sewa      : Rp" + mobil.getTarifSewa());
-        System.out.println("Tarif Denda     : Rp" + mobil.getTarifDenda());
+        // System.out.println("Tarif Denda : Rp" + mobil.getTarifDenda()); -> harus
+        // diperbaiki
 
         System.out.println("\n1. Lanjut Pembayaran");
         System.out.println("2. Kembali");
@@ -65,7 +66,7 @@ public class PeminjamanMenu {
 
         try {
             int pilih = Integer.parseInt(sc.nextLine());
-            switch (pilih){
+            switch (pilih) {
                 case 1:
                     prosesPembayaran(mobil);
                     break;
@@ -79,7 +80,7 @@ public class PeminjamanMenu {
         }
     }
 
-    private void prosesPembayaran(Mobil mobil){
+    private void prosesPembayaran(Mobil mobil) {
         System.out.println("\n=== PEMBAYARAN ===");
         System.out.print("Lama sewa (hari): ");
         try {
@@ -92,7 +93,7 @@ public class PeminjamanMenu {
             System.out.print("Konfirmasi pembayaran? (y/n): ");
             String confirm = sc.nextLine();
 
-            if(confirm.equalsIgnoreCase("y")){
+            if (confirm.equalsIgnoreCase("y")) {
                 if (transaksiService.createPeminjaman(user, mobil, lamaSewa)) {
                     System.out.println("\nPembayaran berhasil!");
                     System.out.println("Peminjaman berhasil diajukan!");

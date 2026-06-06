@@ -13,14 +13,11 @@ public class AuthService {
         if (user != null) {
             return new AuthResponse(
                     AuthStatus.SUCCESS,
-                    user
-            );
+                    user);
         }
 
-        
         return new AuthResponse(
                 AuthStatus.ACCOUNT_NOT_FOUND,
-                null
-        );
+                null);
     }
 }

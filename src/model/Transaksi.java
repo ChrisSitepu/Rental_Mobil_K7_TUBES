@@ -16,14 +16,14 @@ public class Transaksi {
     private LocalDateTime waktuAktualPengembalian;
     private int total;
     private LocalDateTime waktuPinjam;
-    
+
     // Additional fields for display
     private String namaMobil;
     private String platMobil;
     private String namaMember;
 
-    public Transaksi(int idTransaksi, int idMobil, int idCabang, int idMember, String status, int totalHariSewa, 
-                     int biayaSewa, int total, LocalDateTime waktuPinjam, LocalDateTime waktuRencanaPengembalian) {
+    public Transaksi(int idTransaksi, int idMobil, int idCabang, int idMember, String status, int totalHariSewa,
+            int biayaSewa, int total, LocalDateTime waktuPinjam, LocalDateTime waktuRencanaPengembalian) {
         this.idTransaksi = idTransaksi;
         this.idMobil = idMobil;
         this.idCabang = idCabang;
@@ -38,27 +38,77 @@ public class Transaksi {
 
     public Transaksi(String string, String string2, int i, String string3, String string4, String string5,
             String string6, String string7, String string8) {
-        //TODO Auto-generated constructor stub
+        // TODO Auto-generated constructor stub
     }
 
     // Getters and Setters
-    public int getIdTransaksi() { return idTransaksi; }
-    public int getIdMobil() { return idMobil; }
-    public int getIdMember() { return idMember; }
-    public String getStatus() { return status; }
-    public int getTotalHariSewa() { return totalHariSewa; }
-    public int getBiayaSewa() { return biayaSewa; }
-    public int getBiayaKeterlambatan() { return biayaKeterlambatan; }
-    public void setBiayaKeterlambatan(int biayaKeterlambatan) { this.biayaKeterlambatan = biayaKeterlambatan; }
-    public LocalDateTime getWaktuRencanaPengembalian() { return waktuRencanaPengembalian; }
-    public LocalDateTime getWaktuAktualPengembalian() { return waktuAktualPengembalian; }
-    public void setWaktuAktualPengembalian(LocalDateTime waktuAktualPengembalian) { this.waktuAktualPengembalian = waktuAktualPengembalian; }
-    public String getNamaMobil() { return namaMobil; }
-    public void setNamaMobil(String namaMobil) { this.namaMobil = namaMobil; }
-    public String getPlatMobil() { return platMobil; }
-    public void setPlatMobil(String platMobil) { this.platMobil = platMobil; }
-    public String getNamaMember() { return namaMember; }
-    public void setNamaMember(String namaMember) { this.namaMember = namaMember; }
+    public int getIdTransaksi() {
+        return idTransaksi;
+    }
+
+    public int getIdMobil() {
+        return idMobil;
+    }
+
+    public int getIdMember() {
+        return idMember;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public int getTotalHariSewa() {
+        return totalHariSewa;
+    }
+
+    public int getBiayaSewa() {
+        return biayaSewa;
+    }
+
+    public int getBiayaKeterlambatan() {
+        return biayaKeterlambatan;
+    }
+
+    public void setBiayaKeterlambatan(int biayaKeterlambatan) {
+        this.biayaKeterlambatan = biayaKeterlambatan;
+    }
+
+    public LocalDateTime getWaktuRencanaPengembalian() {
+        return waktuRencanaPengembalian;
+    }
+
+    public LocalDateTime getWaktuAktualPengembalian() {
+        return waktuAktualPengembalian;
+    }
+
+    public void setWaktuAktualPengembalian(LocalDateTime waktuAktualPengembalian) {
+        this.waktuAktualPengembalian = waktuAktualPengembalian;
+    }
+
+    public String getNamaMobil() {
+        return namaMobil;
+    }
+
+    public void setNamaMobil(String namaMobil) {
+        this.namaMobil = namaMobil;
+    }
+
+    public String getPlatMobil() {
+        return platMobil;
+    }
+
+    public void setPlatMobil(String platMobil) {
+        this.platMobil = platMobil;
+    }
+
+    public String getNamaMember() {
+        return namaMember;
+    }
+
+    public void setNamaMember(String namaMember) {
+        this.namaMember = namaMember;
+    }
 
     public void setIdTransaksi(int idTransaksi) {
         this.idTransaksi = idTransaksi;
@@ -119,5 +169,5 @@ public class Transaksi {
     public void setWaktuPinjam(LocalDateTime waktuPinjam) {
         this.waktuPinjam = waktuPinjam;
     }
-    
+
 }
