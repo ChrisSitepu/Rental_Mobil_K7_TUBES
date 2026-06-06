@@ -23,8 +23,7 @@ public class Mobil {
             int kapasitas,
             int tahunPembuatan,
             boolean available,
-            int hargaSewa
-    ) {
+            int hargaSewa) {
         this.idMobil = idMobil;
         this.idCabang = idCabang;
         this.brand = brand;
@@ -34,23 +33,59 @@ public class Mobil {
         this.kapasitas = kapasitas;
         this.tahunPembuatan = tahunPembuatan;
         this.available = available;
-        
+        this.hargaSewa = hargaSewa;
     }
 
-    public int getIdMobil() { return idMobil; }
-    public int getIdCabang() { return idCabang; }
-    public String getNama() { return brand + " " + tipe; }
-    public String getBrand() { return brand; }
-    public String getTipe() { return tipe; }
-    public String getWarna() { return warna; }
-    public String getPlat() { return plat; }
-    public int getKapasitas() { return kapasitas; }
-    public int getTahunPembuatan() { return tahunPembuatan; }
-    public boolean isAvailable() { return available; }
-    public void setAvailable(boolean available) { this.available = available; }
-    
-    
-    public int getTarifSewa() { return this.hargaSewa; }
-    
-   
+    public int getIdMobil() {
+        return idMobil;
+    }
+
+    public int getIdCabang() {
+        return idCabang;
+    }
+
+    public String getNama() {
+        return brand + " " + tipe;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public String getTipe() {
+        return tipe;
+    }
+
+    public String getWarna() {
+        return warna;
+    }
+
+    public String getPlat() {
+        return plat;
+    }
+
+    public int getKapasitas() {
+        return kapasitas;
+    }
+
+    public int getTahunPembuatan() {
+        return tahunPembuatan;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
+    public void setHargaSewa(int hargaSewa) {
+        this.hargaSewa = hargaSewa;
+    }
+
+    public int getTarifSewa() {
+        return this.hargaSewa;
+    }
+
 }
