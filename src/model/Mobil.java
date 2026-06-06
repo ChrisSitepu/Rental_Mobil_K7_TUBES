@@ -11,6 +11,7 @@ public class Mobil {
     private int kapasitas;
     private int tahunPembuatan;
     private boolean available;
+    private int hargaSewa;
 
     public Mobil(
             int idMobil,
@@ -21,7 +22,8 @@ public class Mobil {
             String plat,
             int kapasitas,
             int tahunPembuatan,
-            boolean available
+            boolean available,
+            int hargaSewa
     ) {
         this.idMobil = idMobil;
         this.idCabang = idCabang;
@@ -32,6 +34,7 @@ public class Mobil {
         this.kapasitas = kapasitas;
         this.tahunPembuatan = tahunPembuatan;
         this.available = available;
+        
     }
 
     public int getIdMobil() { return idMobil; }
@@ -46,7 +49,8 @@ public class Mobil {
     public boolean isAvailable() { return available; }
     public void setAvailable(boolean available) { this.available = available; }
     
-    // Default rates as hardcoded getters since they are not in DB
-    public double getTarifSewa() { return 300000; }
-    public double getTarifDenda() { return 50000; }
+    
+    public int getTarifSewa() { return this.hargaSewa; }
+    
+   
 }

@@ -74,7 +74,42 @@ public class TransaksiMenu {
         }
 
         private void showHistori() {
-                System.out.println("\nFitur belum diimplementasikan.");
+                System.out.println("\n=== HISTORI TRANSAKSI ===");
+
+                TransaksiService transaksiService = new TransaksiService();
+                ArrayList<Transaksi> list = transaksiService.getTransaksiHistory(user);
+
+                if (list.isEmpty()) {
+                        System.out.println("Anda belum memiliki riwayat transaksi.");
+                        return;
+                }
+
+                for (int i = 0; i < list.size(); i++) {
+                        Transaksi t = list.get(i);
+                        System.out.println("\n===== TRANSAKSI #" + t.getIdTransaksi() + " =====");
+                        System.out.println("Mobil              : " + t.getNamaMobil());
+                        System.out.println("Plat Mobil         : " + t.getPlatMobil());
+                        System.out.println("Tanggal Pinjam     : " + t.getWaktuPinjam());
+                        System.out.println("Rencana Kembali    : " + t.getWaktuRencanaPengembalian());
+                        
+                        if (t.getWaktuAktualPengembalian() != null) {
+                                System.out.println("Tanggal Kembali    : " + t.getWaktuAktualPengembalian());
+                        }
+                        
+                        System.out.println("Total Hari         : " + t.getTotalHariSewa() + " Hari");
+                        System.out.println("Biaya Sewa         : Rp" + t.getBiayaSewa());
+                        
+                        if (t.getBiayaKeterlambatan() > 0) {
+                                System.out.println("Denda              : Rp" + t.getBiayaKeterlambatan());
+                        }
+                        
+                        System.out.println("Total Bayar        : Rp" + t.getTotal());
+                        System.out.println("Status             : " + t.getStatus());
+                        
+                        if (t.getCatatan() != null && !t.getCatatan().isEmpty()) {
+                                System.out.println("Catatan            : " + t.getCatatan());
+                        }
+                }
         }
 
         private void tampilkanDetail(

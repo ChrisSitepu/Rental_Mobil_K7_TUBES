@@ -15,7 +15,8 @@ import java.util.ArrayList;
 public class UserService {
 
     public User getUserByEmailAndPassword(String email, String password) {
-        String sql = "SELECT u.*, m.id_member, m.no_sim, p.id_pegawai, j.nama_jabatan " +
+        String sql = "SELECT u.id_user, u.nama, u.email, u.password, u.no_telp, u.alamat, " +
+                "m.id_member, m.no_sim, p.id_pegawai, j.nama_jabatan " +
                 "FROM Users u " +
                 "LEFT JOIN Member m ON u.id_user = m.id_user " +
                 "LEFT JOIN Pegawai p ON u.id_user = p.id_user " +
@@ -28,40 +29,43 @@ public class UserService {
             stmt.setString(1, email);
             stmt.setString(2, password);
 
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Role role = null;
 
-            if (rs.next()) {
-                Role role = null;
+                    String jab = rs.getString("nama_jabatan");
+                    int idMem = rs.getInt("id_member");
+                    if (rs.wasNull()) idMem = 0;
+                    
+                    int idPeg = rs.getInt("id_pegawai");
+                    if (rs.wasNull()) idPeg = 0;
 
-                String jab = rs.getString("nama_jabatan");
-                int idMem = rs.getInt("id_member");
-                int idPeg = rs.getInt("id_pegawai");
-
-                if (idPeg > 0) {
-                    if (jab != null && jab.equalsIgnoreCase("Manager")) {
-                        role = Role.MANAGER;
-                    } else {
-                        role = Role.PEGAWAI;
+                    if (idPeg > 0) {
+                        if (jab != null && jab.trim().equalsIgnoreCase("Manager")) {
+                            role = Role.MANAGER;
+                        } else {
+                            role = Role.PEGAWAI;
+                        }
+                    } else if (idMem > 0) {
+                        role = Role.MEMBER;
                     }
-                } else if (idMem > 0) {
-                    role = Role.MEMBER;
-                }
 
-                if (role == null) {
-                    return null;
-                }
+                    if (role == null) {
+                        return null;
+                    }
 
-                return new User(
-                        rs.getInt("id_user"),
-                        idMem,
-                        idPeg,
-                        rs.getString("nama"),
-                        rs.getString("email"),
-                        rs.getString("password"),
-                        rs.getString("no_telp"),
-                        rs.getString("alamat"),
-                        rs.getString("no_sim") != null ? rs.getString("no_sim") : "-",
-                        role);
+                    return new User(
+                            rs.getInt("id_user"),
+                            idMem,
+                            idPeg,
+                            rs.getString("nama"),
+                            rs.getString("email"),
+                            rs.getString("password"),
+                            rs.getString("no_telp"),
+                            rs.getString("alamat"),
+                            (rs.getString("no_sim") != null) ? rs.getString("no_sim") : "-",
+                            role);
+                }
             }
 
         } catch (SQLException e) {

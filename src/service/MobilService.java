@@ -28,7 +28,8 @@ public class MobilService {
                         rs.getString("no_plat"),
                         rs.getInt("kapasitas"),
                         rs.getInt("tahun_pembuatan"),
-                        rs.getString("status").equalsIgnoreCase("Tersedia")
+                        rs.getString("status").equalsIgnoreCase("Tersedia"),
+                        rs.getInt("harga_sewa")
                 ));
             }
         } catch (SQLException e) {
@@ -38,8 +39,8 @@ public class MobilService {
     }
 
     public boolean addMobil(Mobil m, int idCabang) {
-        String sql = "INSERT INTO Mobil (id_mobil, id_cabang, no_plat, brand, tipe, warna, kapasitas, tahun_pembuatan, status) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Mobil (id_mobil, id_cabang, no_plat, brand, tipe, warna, kapasitas, tahun_pembuatan, status, harga_sewa) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = SQLDatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
@@ -53,7 +54,21 @@ public class MobilService {
             stmt.setInt(7, m.getKapasitas());
             stmt.setInt(8, m.getTahunPembuatan());
             stmt.setString(9, m.isAvailable() ? "Tersedia" : "Dipinjam");
+            stmt.setInt(10, m.getTarifSewa());
             
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateMobilRate(String plat, int newRate) {
+        String sql = "UPDATE Mobil SET harga_sewa = ? WHERE no_plat = ?";
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, newRate);
+            stmt.setString(2, plat);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

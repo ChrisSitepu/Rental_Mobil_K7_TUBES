@@ -238,4 +238,52 @@ public class TransaksiService {
 
     return list;
 }
+
+    public ArrayList<Transaksi> getTransaksiHistory(User user) {
+        ArrayList<Transaksi> list = new ArrayList<>();
+
+        String sql = "SELECT p.*, m.brand + ' ' + m.tipe AS nama_mobil, m.no_plat " +
+                     "FROM Peminjaman p " +
+                     "JOIN Mobil m ON p.id_mobil = m.id_mobil " +
+                     "WHERE p.id_member = ? " +
+                     "ORDER BY p.waktu_pinjam DESC";
+
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, user.getIdMember());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Transaksi t = new Transaksi(
+                        rs.getInt("id_transaksi"),
+                        rs.getInt("id_mobil"),
+                        rs.getInt("id_cabang"),
+                        rs.getInt("id_member"),
+                        rs.getString("status"),
+                        rs.getInt("total_hari_sewa"),
+                        rs.getInt("biaya_sewa"),
+                        rs.getInt("total"),
+                        rs.getTimestamp("waktu_pinjam").toLocalDateTime(),
+                        rs.getTimestamp("waktu_rencana_pengembalian").toLocalDateTime()
+                    );
+
+                    t.setNamaMobil(rs.getString("nama_mobil"));
+                    t.setPlatMobil(rs.getString("no_plat"));
+                    
+                    Timestamp actualReturn = rs.getTimestamp("waktu_aktual_pengembalian");
+                    if (actualReturn != null) {
+                        t.setWaktuAktualPengembalian(actualReturn.toLocalDateTime());
+                    }
+                    t.setBiayaKeterlambatan(rs.getInt("biaya_keterlambatan"));
+                    t.setCatatan(rs.getString("catatan"));
+
+                    list.add(t);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

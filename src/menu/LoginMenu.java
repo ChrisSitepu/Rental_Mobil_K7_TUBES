@@ -19,8 +19,9 @@ public class LoginMenu {
 
             System.out.println("\n===== LOGIN =====");
 
-            System.out.print("Email    : ");
+            System.out.print("Email (atau 0 untuk kembali) : ");
             String email = sc.nextLine();
+            if (email.equals("0")) return;
 
             System.out.print("Password : ");
             String password = sc.nextLine();
@@ -51,7 +52,7 @@ public class LoginMenu {
                             break;
                     }
 
-                    break;
+                    return; // Kembali ke menu utama setelah logout
 
                 case WRONG_PASSWORD:
                     System.out.println("Password salah!");

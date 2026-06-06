@@ -35,10 +35,13 @@ CREATE TABLE Pegawai (
 	id_user INT,
 	id_jabatan INT,
 	status VARCHAR(20),
+	id_manager INT NULL
 
 	FOREIGN KEY (id_user) REFERENCES Users(id_user),
 	FOREIGN KEY (id_jabatan) REFERENCES Jabatan(id_jabatan)
 );
+
+
 
 -- Entitas Cabang
 CREATE TABLE Cabang(
@@ -128,8 +131,9 @@ CREATE TABLE FotoKondisi(
 -- Users
 INSERT INTO Users 
 VALUES 
-	(1, 'Dodo', 'dodo@gmail.com', '0812345662', 'Bandung', '123'),
-	(2, 'Admin1', 'admin1@gmail.com', '08124858', 'Jakarta', 'admin1');
+	(1, 'Manager', 'manager@gmail', '0812345662', 'Bandung', 'Manager'),
+	(2, 'Admin1', 'admin1@gmail.com', '08124858', 'Jakarta', 'admin123'),
+	(3, 'Admin2', 'admin2@gmail.com', '081233215', 'Semarang', 'admin123');
 
 -- Jabatan 
 INSERT INTO Jabatan 
@@ -138,15 +142,19 @@ VALUES
 	(2, 'Pegawai');
 
 --Pegawai
-
-INSERT INTO Pegawai
+INSERT INTO Pegawai(id_user, id_jabatan, status, id_manager)
 VALUES 
-	(1, 2, 2, 'Aktif');
+	(1,1,'Aktif', NULL),
+	()
+
+
+INSERT INTO Pegawai (id_user, id_jabatan, status)
+VALUES (2, 1, 'Aktif');
 
 -- Member 
 INSERT INTO Member 
 VALUES 
-	(1, 1, 'B123456', '2028-01-01', '2026-05-24', 'Aktif');
+	(1, 3, 'B123456', '2028-01-01', '2026-05-24', 'Aktif');
 
 --Cabang
 INSERT INTO Cabang 
@@ -163,3 +171,24 @@ VALUES
 SELECT *
 FROM
 	Mobil
+
+UPDATE Users
+SET
+	nama = 'Manager',
+	email = 'Manager@gmailcom',
+	password = 'manager123'
+WHERE id_user = 1;
+
+UPDATE Pegawai
+SET
+	id_manager = 1
+WHERE id_jabatan = 2
+
+
+
+
+UPDATE Users
+SET
+	email = 'manager@gmail.com'
+WHERE 
+	id_user = 1;
