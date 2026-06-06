@@ -64,6 +64,7 @@ CREATE TABLE Mobil(
 	kapasitas INT,
 	tahun_pembuatan INT,
 	status VARCHAR(20)
+	harga_sewa INT,
 
 	FOREIGN KEY (id_cabang) REFERENCES Cabang(id_cabang)
 );
