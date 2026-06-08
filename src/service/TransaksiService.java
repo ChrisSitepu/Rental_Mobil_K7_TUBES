@@ -198,6 +198,48 @@ public class TransaksiService {
         }
     }
 
+    public ArrayList<Pembayaran> getPendingPembayaran() {
+        ArrayList<Pembayaran> list = new ArrayList<>();
+        String sql = "SELECT * FROM Pembayaran WHERE status = 'PENDING' OR status = 'MENUNGGU VERIFIKASI'";
+
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(new Pembayaran(
+                        rs.getInt("id_pembayaran"),
+                        rs.getInt("id_transaksi"),
+                        rs.getInt("id_pegawai"),
+                        rs.getTimestamp("waktu_pembayaran") != null ? rs.getTimestamp("waktu_pembayaran").toLocalDateTime() : null,
+                        rs.getString("status"),
+                        rs.getInt("jumlah"),
+                        rs.getString("Metode")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public boolean verifyPembayaran(int idPembayaran, int idPegawai, boolean approved) {
+        String status = approved ? "LUNAS" : "DITOLAK";
+        String sql = "UPDATE Pembayaran SET status = ?, id_pegawai = ?, waktu_pembayaran = GETDATE() WHERE id_pembayaran = ?";
+
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, status);
+            stmt.setInt(2, idPegawai);
+            stmt.setInt(3, idPembayaran);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private int getNextId(Connection conn, String sql) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(sql);
                 ResultSet rs = stmt.executeQuery()) {
