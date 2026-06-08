@@ -15,6 +15,8 @@ public class AuthService {
             """
             SELECT
                 u.id_user,
+                m.id_member,
+                p.id_pegawai,
                 u.nama,
                 u.email,
                 u.password,
@@ -27,22 +29,14 @@ public class AuthService {
                 END AS role
 
             FROM Users u
-
-            LEFT JOIN Member m
-                ON u.id_user = m.id_user
-
-            LEFT JOIN Pegawai p
-                ON u.id_user = p.id_user
-
+            LEFT JOIN Member m ON u.id_user = m.id_user
+            LEFT JOIN Pegawai p ON u.id_user = p.id_user
             WHERE u.email = ?
             """;
 
         try (
-            Connection conn =
-                SQLDatabaseConnection.getConnection();
-
-            PreparedStatement ps =
-                conn.prepareStatement(sql);
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
         ) {
 
             ps.setString(1, email);
@@ -50,50 +44,50 @@ public class AuthService {
             ResultSet rs = ps.executeQuery();
 
             if (!rs.next()) {
-
-                return new AuthResponse(
-                    AuthStatus.ACCOUNT_NOT_FOUND,
-                    null
-                );
+                return new AuthResponse(AuthStatus.ACCOUNT_NOT_FOUND, null);
             }
 
-            String dbPassword =
-                rs.getString("password");
+            String dbPassword = rs.getString("password");
 
             if (!dbPassword.equals(password)) {
-
-                return new AuthResponse(
-                    AuthStatus.WRONG_PASSWORD,
-                    null
-                );
+                return new AuthResponse(AuthStatus.WRONG_PASSWORD, null);
             }
 
-            Role role =
-                Role.valueOf(
-                    rs.getString("role")
-                );
+            Role role = Role.valueOf(rs.getString("role"));
+
+            // 🔥 SAFE READ idPegawai (anti NULL jadi 0 masalah FK)
+            int idPegawai = rs.getInt("id_pegawai");
+            if (rs.wasNull()) {
+                idPegawai = -1;
+            }
+
+            int idMember = rs.getInt("id_member");
+            if (rs.wasNull()) {
+                idMember = -1;
+            }
 
             User user = new User(
+                rs.getInt("id_user"),
+                idMember,
+                idPegawai,
                 rs.getString("nama"),
                 rs.getString("email"),
                 dbPassword,
                 rs.getString("no_telp"),
+                null,
+                null,
                 role
             );
 
-            return new AuthResponse(
-                AuthStatus.SUCCESS,
-                user
-            );
+            if (role != Role.PEGAWAI) {
+                user.setIdPegawai(-1);
+            }
+
+            return new AuthResponse(AuthStatus.SUCCESS, user);
 
         } catch (Exception e) {
-
             e.printStackTrace();
-
-            return new AuthResponse(
-                AuthStatus.ACCOUNT_NOT_FOUND,
-                null
-            );
+            return new AuthResponse(AuthStatus.ACCOUNT_NOT_FOUND, null);
         }
     }
 
@@ -104,94 +98,73 @@ public class AuthService {
         String noTelp,
         String alamat,
         String noSim
-) {
+    ) {
 
-    String cekEmail =
-            "SELECT id_user FROM Users WHERE email = ?";
+        String cekEmail = "SELECT id_user FROM Users WHERE email = ?";
 
-    String insertUser =
+        String insertUser =
             """
             INSERT INTO Users
             (nama,email,no_telp,alamat,password)
-            VALUES
-            (?,?,?,?,?)
+            VALUES (?,?,?,?,?)
             """;
 
-    String insertMember =
+        String insertMember =
             """
             INSERT INTO Member
             (id_user,no_sim,tanggal_daftar,status)
-            VALUES
-            (?, ?, GETDATE(), 'Aktif')
+            VALUES (?, ?, GETDATE(), 'Aktif')
             """;
 
-    try (
-        Connection conn =
-            SQLDatabaseConnection.getConnection()
-    ) {
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection()
+        ) {
 
-        conn.setAutoCommit(false);
+            conn.setAutoCommit(false);
 
-        // cek email sudah ada atau belum
+            PreparedStatement cek = conn.prepareStatement(cekEmail);
+            cek.setString(1, email);
 
-        PreparedStatement cek =
-                conn.prepareStatement(cekEmail);
+            ResultSet rs = cek.executeQuery();
 
-        cek.setString(1, email);
+            if (rs.next()) {
+                return false;
+            }
 
-        ResultSet rs = cek.executeQuery();
+            PreparedStatement psUser =
+                conn.prepareStatement(insertUser, PreparedStatement.RETURN_GENERATED_KEYS);
 
-        if(rs.next()) {
-            return false;
-        }
+            psUser.setString(1, nama);
+            psUser.setString(2, email);
+            psUser.setString(3, noTelp);
+            psUser.setString(4, alamat);
+            psUser.setString(5, password);
 
-        // insert user
+            psUser.executeUpdate();
 
-        PreparedStatement psUser =
-                conn.prepareStatement(
-                    insertUser,
-                    PreparedStatement.RETURN_GENERATED_KEYS
-                );
+            ResultSet generatedKeys = psUser.getGeneratedKeys();
 
-        psUser.setString(1, nama);
-        psUser.setString(2, email);
-        psUser.setString(3, noTelp);
-        psUser.setString(4, alamat);
-        psUser.setString(5, password);
+            if (!generatedKeys.next()) {
+                conn.rollback();
+                return false;
+            }
 
-        psUser.executeUpdate();
+            int idUser = generatedKeys.getInt(1);
 
-        ResultSet generatedKeys =
-                psUser.getGeneratedKeys();
-
-        if(!generatedKeys.next()) {
-
-            conn.rollback();
-            return false;
-        }
-
-        int idUser =
-                generatedKeys.getInt(1);
-
-        // insert member
-
-        PreparedStatement psMember =
+            PreparedStatement psMember =
                 conn.prepareStatement(insertMember);
 
-        psMember.setInt(1, idUser);
-        psMember.setString(2, noSim);
+            psMember.setInt(1, idUser);
+            psMember.setString(2, noSim);
 
-        psMember.executeUpdate();
+            psMember.executeUpdate();
 
-        conn.commit();
+            conn.commit();
+            return true;
 
-        return true;
-
-    } catch (Exception e) {
-
-        e.printStackTrace();
-
-        return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
-}
 }

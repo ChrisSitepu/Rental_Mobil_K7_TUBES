@@ -2,13 +2,16 @@ package model;
 
 public class User {
 
+    private int idUser;
+    private int idMember;
+    private int idPegawai;
+
     private String nama;
-
     private String email;
-
     private String password;
-
     private String nomorTelepon;
+    private String alamat;
+    private String noSim;
 
     private Role role;
 
@@ -17,8 +20,7 @@ public class User {
             String email,
             String password,
             String nomorTelepon,
-            Role role
-    ) {
+            Role role) {
 
         this.nama = nama;
         this.email = email;
@@ -27,12 +29,45 @@ public class User {
         this.role = role;
     }
 
-    public int getIdCabang() {
-        return idCabang;
+    // Constructor yang dipakai UserService
+    public User(
+            int idUser,
+            int idMember,
+            int idPegawai,
+            String nama,
+            String email,
+            String password,
+            String nomorTelepon,
+            String alamat,
+            String noSim,
+            Role role) {
+
+        this.idUser = idUser;
+        this.idMember = idMember;
+        this.idPegawai = idPegawai;
+        this.nama = nama;
+        this.email = email;
+        this.password = password;
+        this.nomorTelepon = nomorTelepon;
+        this.alamat = alamat;
+        this.noSim = noSim;
+        this.role = role;
     }
 
-    public void setIdCabang(int idCabang) {
-        this.idCabang = idCabang;
+    public int getIdUser() {
+        return idUser;
+    }
+
+    public int getIdPegawai() {
+        return idPegawai;
+    }
+
+    public String getAlamat() {
+        return alamat;
+    }
+
+    public String getNoSim() {
+        return noSim;
     }
 
     public String getNama() {
@@ -55,15 +90,39 @@ public class User {
         return role;
     }
 
-    public void setNama(String nama){
-    this.nama = nama;
-}
+    public void setNama(String nama) {
+        this.nama = nama;
+    }
 
-    public void setEmail(String email){
+    public void setEmail(String email) {
         this.email = email;
     }
 
-    public void setNomorTelepon(String nomorTelepon){
+    public void setNomorTelepon(String nomorTelepon) {
         this.nomorTelepon = nomorTelepon;
+    }
+
+    public void setAlamat(String alamat) {
+        this.alamat = alamat;
+    }
+
+    public void setNoSim(String noSim) {
+        this.noSim = noSim;
+    }
+
+    public void setIdUser(int idUser){
+        this.idUser = idUser;
+    }
+
+    public void setIdMember(int idMember){
+        this.idMember = idMember;
+    }
+
+    public int getIdMember(){
+        return idMember;
+    }
+
+    public void setIdPegawai(int idPegawai) {
+        this.idPegawai = idPegawai;
     }
 }

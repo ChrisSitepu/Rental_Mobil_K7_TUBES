@@ -42,7 +42,7 @@ public class MemberMenu {
                     break;
 
                 case 3:
-                    new TransaksiMenu().show();
+                    new TransaksiMenu(user).show();
                     break;
 
                 case 4:

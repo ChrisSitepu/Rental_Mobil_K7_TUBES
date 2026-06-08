@@ -145,4 +145,69 @@ public class MobilService {
 
         return false;
     }
+
+    public ArrayList<String> getAvailableBrands() {
+
+        ArrayList<String> brands = new ArrayList<>();
+
+        for (Mobil m : getAvailableMobil()) {
+
+            if (!brands.contains(m.getBrand())) {
+                brands.add(m.getBrand());
+            }
+        }
+
+        return brands;
+    }
+
+    public ArrayList<Mobil> getMobilByBrand(String brand) {
+
+        ArrayList<Mobil> result = new ArrayList<>();
+
+        for (Mobil m : getAvailableMobil()) {
+
+            if (m.getBrand().equalsIgnoreCase(brand)) {
+                result.add(m);
+            }
+        }
+
+        return result;
+    }
+
+    public ArrayList<String> getAvailableTipeByBrand(
+            String brand) {
+
+        ArrayList<String> tipeList =
+                new ArrayList<>();
+
+        for (Mobil m : getAvailableMobil()) {
+
+            if (m.getBrand().equalsIgnoreCase(brand)
+                    && !tipeList.contains(m.getTipe())) {
+
+                tipeList.add(m.getTipe());
+            }
+        }
+
+        return tipeList;
+    }
+
+    public ArrayList<Mobil> getMobilByBrandAndTipe(
+            String brand,
+            String tipe) {
+
+        ArrayList<Mobil> result =
+                new ArrayList<>();
+
+        for (Mobil m : getAvailableMobil()) {
+
+            if (m.getBrand().equalsIgnoreCase(brand)
+                    && m.getTipe().equalsIgnoreCase(tipe)) {
+
+                result.add(m);
+            }
+        }
+
+        return result;
+    }
 }
