@@ -146,24 +146,68 @@ public class MobilService {
         return false;
     }
 
-    public boolean deleteMobil(int idMobil) {
+    public ArrayList<String> getAvailableBrands() {
 
-        String sql =
-            "DELETE FROM Mobil WHERE id_mobil=?";
+        ArrayList<String> brands = new ArrayList<>();
 
-        try (
-            Connection conn = SQLDatabaseConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)
-        ) {
+        for (Mobil m : getAvailableMobil()) {
 
-            ps.setInt(1, idMobil);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            if (!brands.contains(m.getBrand())) {
+                brands.add(m.getBrand());
+            }
         }
 
-        return false;
+        return brands;
+    }
+
+    public ArrayList<Mobil> getMobilByBrand(String brand) {
+
+        ArrayList<Mobil> result = new ArrayList<>();
+
+        for (Mobil m : getAvailableMobil()) {
+
+            if (m.getBrand().equalsIgnoreCase(brand)) {
+                result.add(m);
+            }
+        }
+
+        return result;
+    }
+
+    public ArrayList<String> getAvailableTipeByBrand(
+            String brand) {
+
+        ArrayList<String> tipeList =
+                new ArrayList<>();
+
+        for (Mobil m : getAvailableMobil()) {
+
+            if (m.getBrand().equalsIgnoreCase(brand)
+                    && !tipeList.contains(m.getTipe())) {
+
+                tipeList.add(m.getTipe());
+            }
+        }
+
+        return tipeList;
+    }
+
+    public ArrayList<Mobil> getMobilByBrandAndTipe(
+            String brand,
+            String tipe) {
+
+        ArrayList<Mobil> result =
+                new ArrayList<>();
+
+        for (Mobil m : getAvailableMobil()) {
+
+            if (m.getBrand().equalsIgnoreCase(brand)
+                    && m.getTipe().equalsIgnoreCase(tipe)) {
+
+                result.add(m);
+            }
+        }
+
+        return result;
     }
 }

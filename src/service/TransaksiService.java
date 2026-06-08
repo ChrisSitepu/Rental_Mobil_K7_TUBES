@@ -4,7 +4,6 @@ import config.SQLDatabaseConnection;
 import model.Mobil;
 import model.Transaksi;
 import model.User;
-import model.Pembayaran;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,25 +16,32 @@ import java.util.ArrayList;
 public class TransaksiService {
 
     public boolean createPeminjaman(User member, Mobil mobil, int totalHariSewa) {
-        String sqlPeminjaman = "INSERT INTO Peminjaman (id_transaksi, id_mobil, id_cabang, id_member, status, total_hari_sewa, biaya_sewa, total, waktu_pinjam, waktu_rencana_pengembalian) "
-                + "VALUES (?, ?, ?, ?, 'DIPINJAM', ?, ?, ?, GETDATE(), ?)";
 
-        String sqlUpdateMobil = "UPDATE Mobil SET status = 'Dipinjam' WHERE id_mobil = ?";
+        String sql =
+            "INSERT INTO Peminjaman " +
+            "(id_transaksi, id_mobil, id_cabang, id_member, status, total_hari_sewa, biaya_sewa, total, waktu_pinjam, waktu_rencana_pengembalian) " +
+            "VALUES (?, ?, ?, ?, 'MENUNGGU VERIFIKASI', ?, ?, ?, GETDATE(), ?)";
 
-        String sqlPembayaran = "INSERT INTO Pembayaran (id_pembayaran, id_transaksi, waktu_pembayaran, status, jumlah, Metode) "
-                + "VALUES (?, ?, GETDATE(), 'LUNAS', ?, 'Tunai')";
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection()
+        ) {
 
-        Connection conn = null;
-        try {
-            conn = SQLDatabaseConnection.getConnection();
-            conn.setAutoCommit(false);
+            int nextId = getNextId(
+                conn,
+                "SELECT MAX(id_transaksi) FROM Peminjaman"
+            );
 
-            int nextId = getNextId(conn, "SELECT MAX(id_transaksi) FROM Peminjaman");
             double biayaSewa = mobil.getTarifSewa();
             double total = biayaSewa * totalHariSewa;
-            LocalDateTime rencanaKembali = LocalDateTime.now().plusDays(totalHariSewa);
 
-            try (PreparedStatement stmt = conn.prepareStatement(sqlPeminjaman)) {
+            LocalDateTime rencanaKembali =
+                LocalDateTime.now().plusDays(totalHariSewa);
+
+            try (
+                PreparedStatement stmt =
+                    conn.prepareStatement(sql)
+            ) {
+
                 stmt.setInt(1, nextId);
                 stmt.setInt(2, mobil.getIdMobil());
                 stmt.setInt(3, mobil.getIdCabang());
@@ -43,45 +49,19 @@ public class TransaksiService {
                 stmt.setInt(5, totalHariSewa);
                 stmt.setDouble(6, biayaSewa);
                 stmt.setDouble(7, total);
-                stmt.setTimestamp(8, Timestamp.valueOf(rencanaKembali));
-                stmt.executeUpdate();
+                stmt.setTimestamp(
+                    8,
+                    Timestamp.valueOf(rencanaKembali)
+                );
+
+                return stmt.executeUpdate() > 0;
             }
 
-            try (PreparedStatement stmtUpdate = conn.prepareStatement(sqlUpdateMobil)) {
-                stmtUpdate.setInt(1, mobil.getIdMobil());
-                stmtUpdate.executeUpdate();
-            }
-
-            int nextIdBayar = getNextId(conn, "SELECT MAX(id_pembayaran) FROM Pembayaran");
-            try (PreparedStatement stmtBayar = conn.prepareStatement(sqlPembayaran)) {
-                stmtBayar.setInt(1, nextIdBayar);
-                stmtBayar.setInt(2, nextId);
-                stmtBayar.setDouble(3, total);
-                stmtBayar.executeUpdate();
-            }
-
-            conn.commit();
-            return true;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            return false;
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
         }
+
+        return false;
     }
 
     public ArrayList<Transaksi> getAllActivePeminjaman() {
@@ -120,6 +100,68 @@ public class TransaksiService {
         return list;
     }
 
+    public ArrayList<Transaksi> getPendingPeminjaman() {
+
+        ArrayList<Transaksi> list = new ArrayList<>();
+
+        String sql =
+            "SELECT p.*, " +
+            "m.brand + ' ' + m.tipe AS nama_mobil, " +
+            "m.no_plat, " +
+            "u.nama AS nama_member " +
+            "FROM Peminjaman p " +
+            "JOIN Mobil m ON p.id_mobil = m.id_mobil " +
+            "JOIN Member mem ON p.id_member = mem.id_member " +
+            "JOIN Users u ON mem.id_user = u.id_user " +
+            "WHERE p.status = 'MENUNGGU VERIFIKASI'";
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement stmt =
+                conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()
+        ) {
+
+            while (rs.next()) {
+
+                Transaksi t = new Transaksi(
+                    rs.getInt("id_transaksi"),
+                    rs.getInt("id_mobil"),
+                    rs.getInt("id_cabang"),
+                    rs.getInt("id_member"),
+                    rs.getString("status"),
+                    rs.getInt("total_hari_sewa"),
+                    rs.getInt("biaya_sewa"),
+                    rs.getInt("total"),
+                    rs.getTimestamp("waktu_pinjam")
+                        .toLocalDateTime(),
+                    rs.getTimestamp(
+                        "waktu_rencana_pengembalian"
+                    ).toLocalDateTime()
+                );
+
+                t.setNamaMobil(
+                    rs.getString("nama_mobil")
+                );
+
+                t.setPlatMobil(
+                    rs.getString("no_plat")
+                );
+
+                t.setNamaMember(
+                    rs.getString("nama_member")
+                );
+
+                list.add(t);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
     public boolean processReturn(Transaksi t, int idPegawai, String deskripsi, int tingkatKondisi, String fotoUrl) {
         LocalDateTime now = LocalDateTime.now();
         long daysLate = java.time.Duration.between(t.getWaktuRencanaPengembalian(), now).toDays();
@@ -130,7 +172,7 @@ public class TransaksiService {
 
         String sqlUpdatePeminjaman = "UPDATE Peminjaman SET status = 'KEMBALI', waktu_aktual_pengembalian = ?, biaya_keterlambatan = ?, total = total + ? WHERE id_transaksi = ?";
         String sqlUpdateMobil = "UPDATE Mobil SET status = 'Tersedia' WHERE id_mobil = ?";
-        String sqlInsertKondisi = "INSERT INTO KondisiMobil (id_catatan, id_pegawai, id_transaksi, tipe_pencatatan, waktu_pencatatan, deskripsi, tingkat_kondisi) VALUES (?, ?, ?, 'SESUDAH PENGEMBALIAN', GETDATE(), ?, ?)";
+        String sqlInsertKondisi = "INSERT INTO KondisiMobil (id_catatan, id_mobil, id_pegawai, tipe_pencatatan, waktu_pencatatan, deskripsi, tingkat_kondisi) VALUES (?, ?, ?, 'SESUDAH PENGEMBALIAN', GETDATE(), ?, ?)";
         String sqlInsertFoto = "INSERT INTO FotoKondisi (id_foto, id_catatan, foto) VALUES (?, ?, ?)";
 
         Connection conn = null;
@@ -138,6 +180,7 @@ public class TransaksiService {
             conn = SQLDatabaseConnection.getConnection();
             conn.setAutoCommit(false);
 
+            // 1. Update Peminjaman
             try (PreparedStatement stmt = conn.prepareStatement(sqlUpdatePeminjaman)) {
                 stmt.setTimestamp(1, Timestamp.valueOf(now));
                 stmt.setInt(2, denda);
@@ -146,21 +189,76 @@ public class TransaksiService {
                 stmt.executeUpdate();
             }
 
-            try (PreparedStatement stmtUpdate = conn.prepareStatement(sqlUpdateMobil)) {
-                stmtUpdate.setInt(1, t.getIdMobil());
-                stmtUpdate.executeUpdate();
-            }
-
-            int idCatatan = getNextId(conn, "SELECT MAX(id_catatan) FROM KondisiMobil");
-            try (PreparedStatement stmt = conn.prepareStatement(sqlInsertKondisi)) {
-                stmt.setInt(1, idCatatan);
-                stmt.setInt(2, idPegawai);
-                stmt.setInt(3, t.getIdTransaksi());
-                stmt.setString(4, deskripsi);
-                stmt.setInt(5, tingkatKondisi);
+            // 2. Update Mobil
+            try (PreparedStatement stmt = conn.prepareStatement(sqlUpdateMobil)) {
+                stmt.setInt(1, t.getIdMobil());
                 stmt.executeUpdate();
             }
 
+            // 3. Insert Kondisi
+            int idCatatan =
+                getNextId(
+                    conn,
+                    "SELECT MAX(id_catatan) FROM KondisiMobil"
+                );
+
+            try (
+                PreparedStatement stmt =
+                    conn.prepareStatement(sqlInsertKondisi)
+            ) {
+
+                stmt.setInt(
+                    1,
+                    idCatatan
+                );
+
+                stmt.setInt(
+                    2,
+                    t.getIdMobil()
+                );
+
+                stmt.setInt(
+                    3,
+                    idPegawai
+                );
+
+                stmt.setString(
+                    4,
+                    deskripsi
+                );
+
+                stmt.setInt(
+                    5,
+                    tingkatKondisi
+                );
+
+                stmt.executeUpdate();
+            }
+
+            String sqlRelasi =
+                "INSERT INTO Kondisi_Setelah_Sewa " +
+                "(id_transaksi,id_catatan) " +
+                "VALUES (?, ?)";
+
+            try (
+                PreparedStatement stmt =
+                    conn.prepareStatement(sqlRelasi)
+            ) {
+
+                stmt.setInt(
+                    1,
+                    t.getIdTransaksi()
+                );
+
+                stmt.setInt(
+                    2,
+                    idCatatan
+                );
+
+                stmt.executeUpdate();
+            }
+
+            // 4. Insert Foto
             int idFoto = getNextId(conn, "SELECT MAX(id_foto) FROM FotoKondisi");
             try (PreparedStatement stmt = conn.prepareStatement(sqlInsertFoto)) {
                 stmt.setInt(1, idFoto);
@@ -193,83 +291,6 @@ public class TransaksiService {
         }
     }
 
-    public ArrayList<Transaksi> getTransaksiAktif(User user) {
-        ArrayList<Transaksi> list = new ArrayList<>();
-        String sql = "SELECT p.*, m.brand + ' ' + m.tipe AS nama_mobil, m.no_plat " +
-                "FROM Peminjaman p " +
-                "JOIN Mobil m ON p.id_mobil = m.id_mobil " +
-                "WHERE p.id_member = ? AND p.status = 'DIPINJAM'";
-
-        try (Connection conn = SQLDatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, user.getIdMember());
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Transaksi t = new Transaksi(
-                            rs.getInt("id_transaksi"),
-                            rs.getInt("id_mobil"),
-                            rs.getInt("id_cabang"),
-                            rs.getInt("id_member"),
-                            rs.getString("status"),
-                            rs.getInt("total_hari_sewa"),
-                            rs.getInt("biaya_sewa"),
-                            rs.getInt("total"),
-                            rs.getTimestamp("waktu_pinjam").toLocalDateTime(),
-                            rs.getTimestamp("waktu_rencana_pengembalian").toLocalDateTime());
-                    t.setNamaMobil(rs.getString("nama_mobil"));
-                    t.setPlatMobil(rs.getString("no_plat"));
-                    list.add(t);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public ArrayList<Pembayaran> getPendingPembayaran() {
-        ArrayList<Pembayaran> list = new ArrayList<>();
-        String sql = "SELECT * FROM Pembayaran WHERE status = 'PENDING' OR status = 'MENUNGGU VERIFIKASI'";
-
-        try (Connection conn = SQLDatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                list.add(new Pembayaran(
-                        rs.getInt("id_pembayaran"),
-                        rs.getInt("id_transaksi"),
-                        rs.getInt("id_pegawai"),
-                        rs.getTimestamp("waktu_pembayaran") != null ? rs.getTimestamp("waktu_pembayaran").toLocalDateTime() : null,
-                        rs.getString("status"),
-                        rs.getInt("jumlah"),
-                        rs.getString("Metode")));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public boolean verifyPembayaran(int idPembayaran, int idPegawai, boolean approved) {
-        String status = approved ? "LUNAS" : "DITOLAK";
-        String sql = "UPDATE Pembayaran SET status = ?, id_pegawai = ?, waktu_pembayaran = GETDATE() WHERE id_pembayaran = ?";
-
-        try (Connection conn = SQLDatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, status);
-            stmt.setInt(2, idPegawai);
-            stmt.setInt(3, idPembayaran);
-
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     private int getNextId(Connection conn, String sql) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(sql);
                 ResultSet rs = stmt.executeQuery()) {
@@ -280,17 +301,67 @@ public class TransaksiService {
         return 1;
     }
 
+    public ArrayList<Transaksi> getTransaksiAktif(User user) {
+
+        ArrayList<Transaksi> list = new ArrayList<>();
+
+        String sql = "SELECT p.*, " +
+                "m.brand + ' ' + m.tipe AS nama_mobil, " +
+                "m.no_plat " +
+                "FROM Peminjaman p " +
+                "JOIN Mobil m ON p.id_mobil = m.id_mobil " +
+                "WHERE p.id_member = ? " +
+                "AND p.status = 'DIPINJAM'";
+
+        try (
+                Connection conn = SQLDatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, user.getIdMember());
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+
+                Transaksi t = new Transaksi(
+                        rs.getInt("id_transaksi"),
+                        rs.getInt("id_mobil"),
+                        rs.getInt("id_cabang"),
+                        rs.getInt("id_member"),
+                        rs.getString("status"),
+                        rs.getInt("total_hari_sewa"),
+                        rs.getInt("biaya_sewa"),
+                        rs.getInt("total"),
+                        rs.getTimestamp("waktu_pinjam").toLocalDateTime(),
+                        rs.getTimestamp("waktu_rencana_pengembalian").toLocalDateTime());
+
+                t.setNamaMobil(rs.getString("nama_mobil"));
+                t.setPlatMobil(rs.getString("no_plat"));
+
+                list.add(t);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
     public ArrayList<Transaksi> getTransaksiHistory(User user) {
         ArrayList<Transaksi> list = new ArrayList<>();
+
         String sql = "SELECT p.*, m.brand + ' ' + m.tipe AS nama_mobil, m.no_plat " +
                 "FROM Peminjaman p " +
                 "JOIN Mobil m ON p.id_mobil = m.id_mobil " +
-                "WHERE p.id_member = ? ORDER BY p.waktu_pinjam DESC";
+                "WHERE p.id_member = ? " +
+                "ORDER BY p.waktu_pinjam DESC";
 
         try (Connection conn = SQLDatabaseConnection.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, user.getIdMember());
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Transaksi t = new Transaksi(
@@ -314,6 +385,7 @@ public class TransaksiService {
                     }
                     t.setBiayaKeterlambatan(rs.getInt("biaya_keterlambatan"));
                     t.setCatatan(rs.getString("catatan"));
+
                     list.add(t);
                 }
             }
@@ -321,5 +393,248 @@ public class TransaksiService {
             e.printStackTrace();
         }
         return list;
+    }
+    
+    public boolean approvePeminjaman(
+        Transaksi t,
+        int idPegawai,
+        String deskripsi,
+        int tingkatKondisi,
+        String fotoUrl) {
+
+        String sqlUpdatePeminjaman =
+            "UPDATE Peminjaman " +
+            "SET status='DIPINJAM' " +
+            "WHERE id_transaksi=?";
+
+        String sqlUpdateMobil =
+            "UPDATE Mobil " +
+            "SET status='Dipinjam' " +
+            "WHERE id_mobil=?";
+
+        String sqlPembayaran =
+            "INSERT INTO Pembayaran " +
+            "(id_pembayaran,id_transaksi,id_pegawai,waktu_pembayaran,status,jumlah,Metode) " +
+            "VALUES (?, ?, ?, GETDATE(), 'MENUNGGU PEMBAYARAN', ?, 'Tunai')";
+
+        String sqlKondisi =
+            "INSERT INTO KondisiMobil " +
+            "(id_catatan,id_mobil,id_pegawai,tipe_pencatatan,waktu_pencatatan,deskripsi,tingkat_kondisi) " +
+            "VALUES (?, ?, ?, 'SEBELUM SEWA', GETDATE(), ?, ?)";
+
+        String sqlFoto =
+            "INSERT INTO FotoKondisi " +
+            "(id_foto,id_catatan,foto) " +
+            "VALUES (?, ?, ?)";
+
+        Connection conn = null;
+
+        try {
+
+            conn = SQLDatabaseConnection.getConnection();
+
+            conn.setAutoCommit(false);
+
+            try (
+                PreparedStatement ps =
+                    conn.prepareStatement(sqlUpdatePeminjaman)
+            ) {
+
+                ps.setInt(
+                    1,
+                    t.getIdTransaksi()
+                );
+
+                ps.executeUpdate();
+            }
+
+            try (
+                PreparedStatement ps =
+                    conn.prepareStatement(sqlUpdateMobil)
+            ) {
+
+                ps.setInt(
+                    1,
+                    t.getIdMobil()
+                );
+
+                ps.executeUpdate();
+            }
+
+            int idCatatan =
+                getNextId(
+                    conn,
+                    "SELECT MAX(id_catatan) FROM KondisiMobil"
+                );
+
+            try (
+                PreparedStatement ps =
+                    conn.prepareStatement(sqlKondisi)
+            ) {
+
+                ps.setInt(
+                    1,
+                    idCatatan
+                );
+
+                ps.setInt(
+                    2,
+                    t.getIdMobil()
+                );
+
+                ps.setInt(
+                    3,
+                    idPegawai
+                );
+
+                ps.setString(
+                    4,
+                    deskripsi
+                );
+
+                ps.setInt(
+                    5,
+                    tingkatKondisi
+                );
+
+                ps.executeUpdate();
+            }
+
+            int idFoto =
+                getNextId(
+                    conn,
+                    "SELECT MAX(id_foto) FROM FotoKondisi"
+                );
+
+            try (
+                PreparedStatement ps =
+                    conn.prepareStatement(sqlFoto)
+            ) {
+
+                ps.setInt(
+                    1,
+                    idFoto
+                );
+
+                ps.setInt(
+                    2,
+                    idCatatan
+                );
+
+                ps.setString(
+                    3,
+                    fotoUrl
+                );
+
+                ps.executeUpdate();
+            }
+
+            int nextIdPembayaran =
+                getNextId(
+                    conn,
+                    "SELECT MAX(id_pembayaran) FROM Pembayaran"
+                );
+
+            try (
+                PreparedStatement ps =
+                    conn.prepareStatement(sqlPembayaran)
+            ) {
+
+                ps.setInt(
+                    1,
+                    nextIdPembayaran
+                );
+
+                ps.setInt(
+                    2,
+                    t.getIdTransaksi()
+                );
+
+                ps.setInt(
+                    3,
+                    idPegawai
+                );
+
+                ps.setInt(
+                    4,
+                    t.getTotal()
+                );
+
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+
+            return true;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            try {
+                if (conn != null)
+                    conn.rollback();
+            } catch (Exception ex) {
+            }
+
+        }
+
+        return false;
+    }
+
+    public void tampilSemuaKondisiMobil() {
+
+        String sql =
+            "SELECT km.*, " +
+            "m.brand + ' ' + m.tipe AS nama_mobil, " +
+            "m.no_plat " +
+            "FROM KondisiMobil km " +
+            "JOIN Mobil m ON km.id_mobil = m.id_mobil " +
+            "ORDER BY km.waktu_pencatatan DESC";
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
+
+            while (rs.next()) {
+
+                System.out.println("\n==========================");
+
+                System.out.println(
+                    "Mobil : "
+                    + rs.getString("nama_mobil")
+                );
+
+                System.out.println(
+                    "Plat : "
+                    + rs.getString("no_plat")
+                );
+
+                System.out.println(
+                    "Tipe Pencatatan : "
+                    + rs.getString("tipe_pencatatan")
+                );
+
+                System.out.println(
+                    "Waktu : "
+                    + rs.getTimestamp("waktu_pencatatan")
+                );
+
+                System.out.println(
+                    "Deskripsi : "
+                    + rs.getString("deskripsi")
+                );
+
+                System.out.println(
+                    "Tingkat Kondisi : "
+                    + rs.getInt("tingkat_kondisi")
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

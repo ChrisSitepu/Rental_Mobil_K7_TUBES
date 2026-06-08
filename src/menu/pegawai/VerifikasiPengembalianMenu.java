@@ -9,11 +9,11 @@ import service.TransaksiService;
 public class VerifikasiPengembalianMenu {
 
     private Scanner sc = new Scanner(System.in);
-    private User employee;
+    private User user;
     private TransaksiService transaksiService = new TransaksiService();
 
-    public VerifikasiPengembalianMenu(User employee) {
-        this.employee = employee;
+    public VerifikasiPengembalianMenu(User user) {
+        this.user = user;
     }
 
     public void show() {
@@ -67,8 +67,9 @@ public class VerifikasiPengembalianMenu {
         String confirm = sc.nextLine();
 
         if (confirm.equalsIgnoreCase("y")) {
-            if (transaksiService.processReturn(t, employee.getIdPegawai(), deskripsi, tingkat, fotoUrl)) {
-                System.out.println("\nPengembalian berhasil diproses oleh " + employee.getNama() + "!");
+            if (transaksiService.processReturn(t, user.getIdPegawai(), deskripsi, tingkat, fotoUrl)) {
+                System.out.println("\nPengembalian berhasil diproses!");
+                System.out.println("Data kondisi dan denda (jika ada) telah tercatat.");
             } else {
                 System.out.println("\nGagal memproses pengembalian.");
             }

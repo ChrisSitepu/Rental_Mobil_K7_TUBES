@@ -16,13 +16,30 @@ public class PegawaiMenu {
         boolean running = true;
 
         while(running){
-            System.out.println("\n===== MENU PEGAWAI =====");
-            System.out.println("1. Lihat Transaksi Handle");
-            System.out.println("2. Verifikasi Pembayaran");
-            System.out.println("3. Catat Kondisi Mobil");
-            System.out.println("4. Verifikasi Pengembalian");
-            System.out.println("5. Profil");
-            System.out.println("6. Logout");
+
+            System.out.println(
+                    "\n===== MENU PEGAWAI ====="
+            );
+
+            System.out.println(
+                    "1. Lihat Transaksi Handle"
+            );
+
+            System.out.println(
+                    "2. Catatan Kondisi Mobil"
+            );
+
+            System.out.println(
+                    "3. Verifikasi Pengembalian"
+            );
+
+            System.out.println(
+                    "4. Profil"
+            );
+
+            System.out.println(
+                    "5. Logout"
+            );
 
             System.out.print("Pilih: ");
             int pilih;
@@ -37,18 +54,19 @@ public class PegawaiMenu {
                     new HandleTransaksiMenu().show();
                     break;
                 case 2:
-                    new VerifikasiPembayaranMenu(user).show();
+                    new KondisiMobilMenu()
+                            .show();
                     break;
                 case 3:
-                    new KondisiMobilMenu().show();
+                    new VerifikasiPengembalianMenu(user)
+                            .show();
                     break;
                 case 4:
-                    new VerifikasiPengembalianMenu(user).show();
+                    new ProfilePegawaiMenu(user)
+                            .show();
                     break;
+
                 case 5:
-                    new ProfilePegawaiMenu(user).show();
-                    break;
-                case 6:
                     running = false;
                     break;
                 default:

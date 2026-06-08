@@ -69,10 +69,10 @@ public class Mobil {
     }
 
     public boolean isAvailable() {
-        return status != null && status.equalsIgnoreCase("Tersedia");
+        return status != null && status.equalsIgnoreCase("available");
     }
 
     public void setAvailable(boolean available) {
-        this.status = available ? "Tersedia" : "Dipinjam";
+        this.status = available ? "available" : "unavailable";
     }
 }

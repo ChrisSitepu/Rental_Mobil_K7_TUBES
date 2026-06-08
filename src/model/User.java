@@ -3,12 +3,16 @@ package model;
 public class User {
 
     private int idUser;
+    private int idMember;
+    private int idPegawai;
+
     private String nama;
     private String email;
     private String password;
     private String nomorTelepon;
     private String alamat;
     private String noSim;
+
     private Role role;
     private int idPegawai;
     private int idMember;
@@ -23,36 +27,31 @@ public class User {
             String email,
             String password,
             String nomorTelepon,
-            String alamat,
-            String noSim,
-            Role role
-    ) {
-        this.idUser = idUser;
-        this.idMember = idMember;
-        this.idPegawai = idPegawai;
-        this.idCabang = idCabang;
+            Role role) {
+
         this.nama = nama;
         this.email = email;
         this.password = password;
         this.nomorTelepon = nomorTelepon;
-        this.alamat = alamat;
-        this.noSim = noSim;
         this.role = role;
     }
 
+    // Constructor yang dipakai UserService
     public User(
+            int idUser,
+            int idMember,
+            int idPegawai,
             String nama,
             String email,
             String password,
             String nomorTelepon,
             String alamat,
             String noSim,
-            Role role
-    ) {
-        this.idUser = 0;
-        this.idMember = 0;
-        this.idPegawai = 0;
-        this.idCabang = 0;
+            Role role) {
+
+        this.idUser = idUser;
+        this.idMember = idMember;
+        this.idPegawai = idPegawai;
         this.nama = nama;
         this.email = email;
         this.password = password;
@@ -66,20 +65,16 @@ public class User {
         return idUser;
     }
 
-    public int getIdMember() {
-        return idMember;
-    }
-
     public int getIdPegawai() {
         return idPegawai;
     }
 
-    public int getIdCabang() {
-        return idCabang;
+    public String getAlamat() {
+        return alamat;
     }
 
-    public void setIdCabang(int idCabang) {
-        this.idCabang = idCabang;
+    public String getNoSim() {
+        return noSim;
     }
 
     public String getNama() {
@@ -128,5 +123,21 @@ public class User {
 
     public void setNoSim(String noSim) {
         this.noSim = noSim;
+    }
+
+    public void setIdUser(int idUser){
+        this.idUser = idUser;
+    }
+
+    public void setIdMember(int idMember){
+        this.idMember = idMember;
+    }
+
+    public int getIdMember(){
+        return idMember;
+    }
+
+    public void setIdPegawai(int idPegawai) {
+        this.idPegawai = idPegawai;
     }
 }
