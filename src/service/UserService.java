@@ -1,280 +1,257 @@
-// package service;
+package service;
 
-// import config.SQLDatabaseConnection;
-// import model.Role;
-// import model.User;
-// import model.Member;
+import config.SQLDatabaseConnection;
+import model.Role;
+import model.User;
+import model.Member;
 
-// import java.sql.Connection;
-// import java.sql.PreparedStatement;
-// import java.sql.ResultSet;
-// import java.sql.SQLException;
-// import java.time.LocalDate;
-// import java.util.ArrayList;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 
-// public class UserService {
+public class UserService {
 
-//     public User getUserByEmailAndPassword(String email, String password) {
-//         String sql = "SELECT u.id_user, u.nama, u.email, u.password, u.no_telp, u.alamat, " +
-//                 "m.id_member, m.no_sim, p.id_pegawai, j.nama_jabatan " +
-//                 "FROM Users u " +
-//                 "LEFT JOIN Member m ON u.id_user = m.id_user " +
-//                 "LEFT JOIN Pegawai p ON u.id_user = p.id_user " +
-//                 "LEFT JOIN Jabatan j ON p.id_jabatan = j.id_jabatan " +
-//                 "WHERE u.email = ? AND u.password = ?";
+    public User getUserByEmailAndPassword(String email, String password) {
+        String sql = "SELECT u.id_user, u.nama, u.email, u.password, u.no_telp, u.alamat, " +
+                "m.id_member, m.no_sim, p.id_pegawai, p.id_cabang, j.nama_jabatan " +
+                "FROM Users u " +
+                "LEFT JOIN Member m ON u.id_user = m.id_user " +
+                "LEFT JOIN Pegawai p ON u.id_user = p.id_user " +
+                "LEFT JOIN Jabatan j ON p.id_jabatan = j.id_jabatan " +
+                "WHERE u.email = ? AND u.password = ?";
 
-//         try (Connection conn = SQLDatabaseConnection.getConnection();
-//                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-//             stmt.setString(1, email);
-//             stmt.setString(2, password);
+            stmt.setString(1, email);
+            stmt.setString(2, password);
 
-//             try (ResultSet rs = stmt.executeQuery()) {
-//                 if (rs.next()) {
-//                     Role role = null;
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Role role = null;
 
-//                     String jab = rs.getString("nama_jabatan");
-//                     int idMem = rs.getInt("id_member");
-//                     if (rs.wasNull()) idMem = 0;
+                    String jab = rs.getString("nama_jabatan");
+                    int idMem = rs.getInt("id_member");
+                    if (rs.wasNull()) idMem = 0;
                     
-//                     int idPeg = rs.getInt("id_pegawai");
-//                     if (rs.wasNull()) idPeg = 0;
+                    int idPeg = rs.getInt("id_pegawai");
+                    if (rs.wasNull()) idPeg = 0;
 
-//                     if (idPeg > 0) {
-//                         if (jab != null && jab.trim().equalsIgnoreCase("Manager")) {
-//                             role = Role.MANAGER;
-//                         } else {
-//                             role = Role.PEGAWAI;
-//                         }
-//                     } else if (idMem > 0) {
-//                         role = Role.MEMBER;
-//                     }
+                    int idCabang = rs.getInt("id_cabang");
+                    if (rs.wasNull()) idCabang = 0;
 
-//                     if (role == null) {
-//                         return null;
-//                     }
+                    if (idPeg > 0) {
+                        if (jab != null && jab.trim().equalsIgnoreCase("Manager")) {
+                            role = Role.MANAGER;
+                        } else {
+                            role = Role.PEGAWAI;
+                        }
+                    } else if (idMem > 0) {
+                        role = Role.MEMBER;
+                    }
 
-//                     return new User(
-//                             rs.getInt("id_user"),
-//                             idMem,
-//                             idPeg,
-//                             rs.getString("nama"),
-//                             rs.getString("email"),
-//                             rs.getString("password"),
-//                             rs.getString("no_telp"),
-//                             rs.getString("alamat"),
-//                             (rs.getString("no_sim") != null) ? rs.getString("no_sim") : "-",
-//                             role);
-//                 }
-//             }
+                    if (role == null) {
+                        return null;
+                    }
 
-//         } catch (SQLException e) {
-//             e.printStackTrace();
-//         }
+                    return new User(
+                            rs.getInt("id_user"),
+                            idMem,
+                            idPeg,
+                            idCabang,
+                            rs.getString("nama"),
+                            rs.getString("email"),
+                            rs.getString("password"),
+                            rs.getString("no_telp"),
+                            rs.getString("alamat"),
+                            (rs.getString("no_sim") != null) ? rs.getString("no_sim") : "-",
+                            role);
+                }
+            }
 
-//         return null;
-//     }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-//     public boolean registerMember(Member member) {
-//         if (member.getNama().trim().isEmpty()) {
-//             throw new IllegalArgumentException(
-//                     "Nama tidak boleh kosong");
-//         }
-//         if (member.getAlamat().trim().isEmpty()) {
-//             throw new IllegalArgumentException(
-//                     "Alamat tidak boleh kosong");
-//         }
-//         if (!member.getEmail().toLowerCase().endsWith("@gmail.com")) {
-//             throw new IllegalArgumentException(
-//                     "Email harus menggunakan @gmail.com");
-//         }
+        return null;
+    }
 
-//         if (member.getPassword().length() < 8) {
-//             throw new IllegalArgumentException(
-//                     "Password minimal 8 karakter");
-//         }
+    public boolean registerMember(Member member) {
+        if (member.getNama().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nama tidak boleh kosong");
+        }
+        if (member.getAlamat().trim().isEmpty()) {
+            throw new IllegalArgumentException("Alamat tidak boleh kosong");
+        }
+        if (!member.getEmail().toLowerCase().endsWith("@gmail.com")) {
+            throw new IllegalArgumentException("Email harus menggunakan @gmail.com");
+        }
+        if (member.getPassword().length() < 8) {
+            throw new IllegalArgumentException("Password minimal 8 karakter");
+        }
+        if (!member.getNomorTelepon().matches("\\d+")) {
+            throw new IllegalArgumentException("Nomor telepon hanya boleh berisi angka");
+        }
+        if (member.getNomorTelepon().length() < 10 || member.getNomorTelepon().length() > 15) {
+            throw new IllegalArgumentException("Nomor telepon harus 10-15 digit");
+        }
+        if (!member.getTanggalBerlakuSim().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("SIM sudah tidak berlaku");
+        }
+        if (emailExists(member.getEmail())) {
+            throw new IllegalArgumentException("Email sudah terdaftar");
+        }
 
-//         if (!member.getNomorTelepon().matches("\\d+")) {
-//             throw new IllegalArgumentException(
-//                     "Nomor telepon hanya boleh berisi angka");
-//         }
+        String sqlUser = "INSERT INTO Users (id_user, nama, email, no_telp, alamat, password) VALUES (?, ?, ?, ?, ?, ?)";
+        String sqlMember = "INSERT INTO Member (id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status) VALUES (?, ?, ?, GETDATE(), 'Aktif')";
 
-//         if (member.getNomorTelepon().length() < 10 ||
-//                 member.getNomorTelepon().length() > 15) {
+        Connection conn = null;
+        try {
+            conn = SQLDatabaseConnection.getConnection();
+            conn.setAutoCommit(false);
 
-//             throw new IllegalArgumentException(
-//                     "Nomor telepon harus 10-15 digit");
-//         }
+            int nextUserId = getNextUserId(conn);
 
-//         if (!member.getTanggalBerlakuSim().isAfter(LocalDate.now())) {
-//             throw new IllegalArgumentException(
-//                     "SIM sudah tidak berlaku");
-//         }
+            try (PreparedStatement stmtUser = conn.prepareStatement(sqlUser)) {
+                stmtUser.setInt(1, nextUserId);
+                stmtUser.setString(2, member.getNama());
+                stmtUser.setString(3, member.getEmail());
+                stmtUser.setString(4, member.getNomorTelepon());
+                stmtUser.setString(5, member.getAlamat());
+                stmtUser.setString(6, member.getPassword());
+                stmtUser.executeUpdate();
+            }
 
-//         if (emailExists(member.getEmail())) {
-//             throw new IllegalArgumentException(
-//                     "Email sudah terdaftar");
-//         }
-//         String sqlUser = "INSERT INTO Users " +
-//                 "(id_user, nama, email, no_telp, alamat, password) " +
-//                 "VALUES (?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement stmtMember = conn.prepareStatement(sqlMember)) {
+                stmtMember.setInt(1, nextUserId);
+                stmtMember.setString(2, member.getNoSim());
+                stmtMember.setDate(3, java.sql.Date.valueOf(member.getTanggalBerlakuSim()));
+                stmtMember.executeUpdate();
+            }
 
-//         String sqlMember = "INSERT INTO Member " +
-//                 "(id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status) " +
-//                 "VALUES (?, ?, ?, GETDATE(), 'Aktif')";
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
 
-//         Connection conn = null;
+    public ArrayList<User> getAllByRole(Role targetRole) {
+        ArrayList<User> list = new ArrayList<>();
+        String sql = "SELECT u.*, m.id_member, m.no_sim, p.id_pegawai, p.id_cabang, j.nama_jabatan " +
+                "FROM Users u " +
+                "LEFT JOIN Member m ON u.id_user = m.id_user " +
+                "LEFT JOIN Pegawai p ON u.id_user = p.id_user " +
+                "LEFT JOIN Jabatan j ON p.id_jabatan = j.id_jabatan";
 
-//         try {
-//             conn = SQLDatabaseConnection.getConnection();
-//             conn.setAutoCommit(false);
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
 
-//             int nextUserId = getNextUserId(conn);
+            while (rs.next()) {
+                Role role = null;
+                String jab = rs.getString("nama_jabatan");
+                int idMem = rs.getInt("id_member");
+                int idPeg = rs.getInt("id_pegawai");
+                int idCabang = rs.getInt("id_cabang");
 
-//             try (PreparedStatement stmtUser = conn.prepareStatement(sqlUser)) {
-//                 stmtUser.setInt(1, nextUserId);
-//                 stmtUser.setString(2, member.getNama());
-//                 stmtUser.setString(3, member.getEmail());
-//                 stmtUser.setString(4, member.getNomorTelepon());
-//                 stmtUser.setString(5, member.getAlamat());
-//                 stmtUser.setString(6, member.getPassword());
+                if (idPeg > 0) {
+                    if (jab != null && jab.equalsIgnoreCase("Manager")) {
+                        role = Role.MANAGER;
+                    } else {
+                        role = Role.PEGAWAI;
+                    }
+                } else if (idMem > 0) {
+                    role = Role.MEMBER;
+                }
 
-//                 stmtUser.executeUpdate();
-//             }
+                if (role == targetRole) {
+                    list.add(new User(
+                            rs.getInt("id_user"),
+                            idMem,
+                            idPeg,
+                            idCabang,
+                            rs.getString("nama"),
+                            rs.getString("email"),
+                            rs.getString("password"),
+                            rs.getString("no_telp"),
+                            rs.getString("alamat"),
+                            rs.getString("no_sim") != null ? rs.getString("no_sim") : "-",
+                            role));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
-//             try (PreparedStatement stmtMember = conn.prepareStatement(sqlMember)) {
-//                 stmtMember.setInt(1, nextUserId);
-//                 stmtMember.setString(2, member.getNoSim());
-//                 stmtMember.setDate(3, java.sql.Date.valueOf(member.getTanggalBerlakuSim()));
+    public boolean updatePegawaiCabang(int idPegawai, int idCabang) {
+        String sql = "UPDATE Pegawai SET id_cabang = ? WHERE id_pegawai = ?";
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idCabang);
+            stmt.setInt(2, idPegawai);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-//                 stmtMember.executeUpdate();
-//             }
+    public boolean deleteUserByEmail(String email) {
+        String sql = "DELETE FROM Users WHERE email = ?";
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Gagal menghapus: pastikan data member/pegawai terkait sudah dihapus.");
+            return false;
+        }
+    }
 
-//             conn.commit();
-//             return true;
+    private int getNextUserId(Connection conn) throws SQLException {
+        String sql = "SELECT MAX(id_user) FROM Users";
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1) + 1;
+            }
+        }
+        return 1;
+    }
 
-//         } catch (SQLException e) {
-//             e.printStackTrace();
-
-//             if (conn != null) {
-//                 try {
-//                     conn.rollback();
-//                 } catch (SQLException ex) {
-//                     ex.printStackTrace();
-//                 }
-//             }
-
-//             return false;
-
-//         } finally {
-//             if (conn != null) {
-//                 try {
-//                     conn.setAutoCommit(true);
-//                     conn.close();
-//                 } catch (SQLException ex) {
-//                     ex.printStackTrace();
-//                 }
-//             }
-//         }
-//     }
-
-//     public ArrayList<User> getAllByRole(Role targetRole) {
-//         ArrayList<User> list = new ArrayList<>();
-
-//         String sql = "SELECT u.*, m.id_member, m.no_sim, p.id_pegawai, j.nama_jabatan " +
-//                 "FROM Users u " +
-//                 "LEFT JOIN Member m ON u.id_user = m.id_user " +
-//                 "LEFT JOIN Pegawai p ON u.id_user = p.id_user " +
-//                 "LEFT JOIN Jabatan j ON p.id_jabatan = j.id_jabatan";
-
-//         try (Connection conn = SQLDatabaseConnection.getConnection();
-//                 PreparedStatement stmt = conn.prepareStatement(sql);
-//                 ResultSet rs = stmt.executeQuery()) {
-
-//             while (rs.next()) {
-//                 Role role = null;
-
-//                 String jab = rs.getString("nama_jabatan");
-//                 int idMem = rs.getInt("id_member");
-//                 int idPeg = rs.getInt("id_pegawai");
-
-//                 if (idPeg > 0) {
-//                     if (jab != null && jab.equalsIgnoreCase("Manager")) {
-//                         role = Role.MANAGER;
-//                     } else {
-//                         role = Role.PEGAWAI;
-//                     }
-//                 } else if (idMem > 0) {
-//                     role = Role.MEMBER;
-//                 }
-
-//                 if (role == targetRole) {
-//                     list.add(new User(
-//                             rs.getInt("id_user"),
-//                             idMem,
-//                             idPeg,
-//                             rs.getString("nama"),
-//                             rs.getString("email"),
-//                             rs.getString("password"),
-//                             rs.getString("no_telp"),
-//                             rs.getString("alamat"),
-//                             rs.getString("no_sim") != null ? rs.getString("no_sim") : "-",
-//                             role));
-//                 }
-//             }
-
-//         } catch (SQLException e) {
-//             e.printStackTrace();
-//         }
-
-//         return list;
-//     }
-
-//     public boolean deleteUserByEmail(String email) {
-//         String sql = "DELETE FROM Users WHERE email = ?";
-
-//         try (Connection conn = SQLDatabaseConnection.getConnection();
-//                 PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-//             stmt.setString(1, email);
-
-//             return stmt.executeUpdate() > 0;
-
-//         } catch (SQLException e) {
-//             System.out.println("Gagal menghapus: pastikan data member/pegawai terkait sudah dihapus.");
-//             return false;
-//         }
-//     }
-
-//     private int getNextUserId(Connection conn) throws SQLException {
-//         String sql = "SELECT MAX(id_user) FROM Users";
-
-//         try (PreparedStatement stmt = conn.prepareStatement(sql);
-//                 ResultSet rs = stmt.executeQuery()) {
-
-//             if (rs.next()) {
-//                 return rs.getInt(1) + 1;
-//             }
-//         }
-
-//         return 1;
-//     }
-
-//     public boolean emailExists(String email) {
-//         String sql = "SELECT 1 FROM Users WHERE email = ?";
-
-//         try (Connection conn = SQLDatabaseConnection.getConnection();
-//                 PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-//             stmt.setString(1, email);
-
-//             ResultSet rs = stmt.executeQuery();
-//             return rs.next();
-
-//         } catch (SQLException e) {
-//             e.printStackTrace();
-//         }
-
-//         return false;
-//     }
-// }
+    public boolean emailExists(String email) {
+        String sql = "SELECT 1 FROM Users WHERE email = ?";
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+}

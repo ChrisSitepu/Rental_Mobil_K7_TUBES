@@ -19,11 +19,16 @@ public class AuthService {
                 u.email,
                 u.password,
                 u.no_telp,
-
+                u.alamat,
+                m.id_member,
+                m.no_sim,
+                p.id_pegawai,
+                p.id_cabang,
+                j.nama_jabatan,
                 CASE
                     WHEN m.id_member IS NOT NULL THEN 'MEMBER'
-                    WHEN p.id_jabatan = 1 THEN 'MANAGER'
-                    WHEN p.id_jabatan = 2 THEN 'PEGAWAI'
+                    WHEN j.nama_jabatan = 'Manager' THEN 'MANAGER'
+                    WHEN p.id_pegawai IS NOT NULL THEN 'PEGAWAI'
                 END AS role
 
             FROM Users u
@@ -33,6 +38,9 @@ public class AuthService {
 
             LEFT JOIN Pegawai p
                 ON u.id_user = p.id_user
+                
+            LEFT JOIN Jabatan j
+                ON p.id_jabatan = j.id_jabatan
 
             WHERE u.email = ?
             """;
@@ -68,16 +76,31 @@ public class AuthService {
                 );
             }
 
-            Role role =
-                Role.valueOf(
-                    rs.getString("role")
-                );
+            String roleStr = rs.getString("role");
+            if (roleStr == null) {
+                return new AuthResponse(AuthStatus.ACCOUNT_NOT_FOUND, null);
+            }
+            
+            Role role = Role.valueOf(roleStr);
+
+            int idMem = rs.getInt("id_member");
+            if (rs.wasNull()) idMem = 0;
+            int idPeg = rs.getInt("id_pegawai");
+            if (rs.wasNull()) idPeg = 0;
+            int idCab = rs.getInt("id_cabang");
+            if (rs.wasNull()) idCab = 0;
 
             User user = new User(
+                rs.getInt("id_user"),
+                idMem,
+                idPeg,
+                idCab,
                 rs.getString("nama"),
                 rs.getString("email"),
                 dbPassword,
                 rs.getString("no_telp"),
+                rs.getString("alamat"),
+                rs.getString("no_sim") != null ? rs.getString("no_sim") : "-",
                 role
             );
 
@@ -112,9 +135,9 @@ public class AuthService {
     String insertUser =
             """
             INSERT INTO Users
-            (nama,email,no_telp,alamat,password)
+            (id_user, nama,email,no_telp,alamat,password)
             VALUES
-            (?,?,?,?,?)
+            (?,?,?,?,?,?)
             """;
 
     String insertMember =
@@ -145,40 +168,35 @@ public class AuthService {
             return false;
         }
 
+        // Get next user id
+        int nextId = 1;
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT MAX(id_user) FROM Users");
+             ResultSet rsMax = stmt.executeQuery()) {
+            if (rsMax.next()) {
+                nextId = rsMax.getInt(1) + 1;
+            }
+        }
+
         // insert user
 
         PreparedStatement psUser =
-                conn.prepareStatement(
-                    insertUser,
-                    PreparedStatement.RETURN_GENERATED_KEYS
-                );
+                conn.prepareStatement(insertUser);
 
-        psUser.setString(1, nama);
-        psUser.setString(2, email);
-        psUser.setString(3, noTelp);
-        psUser.setString(4, alamat);
-        psUser.setString(5, password);
+        psUser.setInt(1, nextId);
+        psUser.setString(2, nama);
+        psUser.setString(3, email);
+        psUser.setString(4, noTelp);
+        psUser.setString(5, alamat);
+        psUser.setString(6, password);
 
         psUser.executeUpdate();
-
-        ResultSet generatedKeys =
-                psUser.getGeneratedKeys();
-
-        if(!generatedKeys.next()) {
-
-            conn.rollback();
-            return false;
-        }
-
-        int idUser =
-                generatedKeys.getInt(1);
 
         // insert member
 
         PreparedStatement psMember =
                 conn.prepareStatement(insertMember);
 
-        psMember.setInt(1, idUser);
+        psMember.setInt(1, nextId);
         psMember.setString(2, noSim);
 
         psMember.executeUpdate();

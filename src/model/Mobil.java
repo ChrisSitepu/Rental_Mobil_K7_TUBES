@@ -67,4 +67,12 @@ public class Mobil {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public boolean isAvailable() {
+        return status != null && status.equalsIgnoreCase("Tersedia");
+    }
+
+    public void setAvailable(boolean available) {
+        this.status = available ? "Tersedia" : "Dipinjam";
+    }
 }
