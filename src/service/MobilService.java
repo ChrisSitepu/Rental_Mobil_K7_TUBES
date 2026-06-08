@@ -145,25 +145,4 @@ public class MobilService {
 
         return false;
     }
-
-    public boolean deleteMobil(int idMobil) {
-
-        String sql =
-            "DELETE FROM Mobil WHERE id_mobil=?";
-
-        try (
-            Connection conn = SQLDatabaseConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)
-        ) {
-
-            ps.setInt(1, idMobil);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
 }
