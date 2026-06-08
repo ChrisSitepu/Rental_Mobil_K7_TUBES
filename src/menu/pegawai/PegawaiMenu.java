@@ -1,13 +1,11 @@
 package menu.pegawai;
 
 import java.util.Scanner;
-
 import model.User;
 
 public class PegawaiMenu {
 
     private Scanner sc = new Scanner(System.in);
-
     private User user;
 
     public PegawaiMenu(User user){
@@ -15,7 +13,6 @@ public class PegawaiMenu {
     }
 
     public void show(){
-
         boolean running = true;
 
         while(running){
@@ -45,27 +42,25 @@ public class PegawaiMenu {
             );
 
             System.out.print("Pilih: ");
-
-            int pilih =
-                    Integer.parseInt(sc.nextLine());
+            int pilih;
+            try {
+                pilih = Integer.parseInt(sc.nextLine());
+            } catch (Exception e) {
+                continue;
+            }
 
             switch(pilih){
-
                 case 1:
-                    new HandleTransaksiMenu()
-                            .show();
+                    new HandleTransaksiMenu().show();
                     break;
-
                 case 2:
                     new KondisiMobilMenu()
                             .show();
                     break;
-
                 case 3:
                     new VerifikasiPengembalianMenu(user)
                             .show();
                     break;
-
                 case 4:
                     new ProfilePegawaiMenu(user)
                             .show();
@@ -74,11 +69,8 @@ public class PegawaiMenu {
                 case 5:
                     running = false;
                     break;
-
                 default:
-                    System.out.println(
-                            "Menu tidak valid!"
-                    );
+                    System.out.println("Menu tidak valid!");
             }
         }
     }

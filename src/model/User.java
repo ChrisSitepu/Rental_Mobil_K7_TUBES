@@ -14,8 +14,15 @@ public class User {
     private String noSim;
 
     private Role role;
+    private int idPegawai;
+    private int idMember;
+    private int idCabang;
 
     public User(
+            int idUser,
+            int idMember,
+            int idPegawai,
+            int idCabang,
             String nama,
             String email,
             String password,
@@ -84,6 +91,14 @@ public class User {
 
     public String getNomorTelepon() {
         return nomorTelepon;
+    }
+
+    public String getAlamat() {
+        return alamat;
+    }
+
+    public String getNoSim() {
+        return noSim;
     }
 
     public Role getRole() {

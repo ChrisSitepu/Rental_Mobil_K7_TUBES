@@ -211,8 +211,9 @@ public class KelolaMobilMenu {
             System.out.println("ID Cabang       : " + m.getIdCabang());
 
             System.out.println("\nMenu Edit:");
-            System.out.println("1. Ubah Status (Tersedia/Tidak Tersedia)");
+            System.out.println("1. Ubah Status");
             System.out.println("2. Ubah Harga Sewa");
+            System.out.println("3. Hapus Mobil");
             System.out.println("0. Kembali");
 
             System.out.print("Pilih aksi: ");
@@ -229,7 +230,7 @@ public class KelolaMobilMenu {
                 case 1:
                     try {
                         String status = input(
-                            "Status Baru: "
+                            "Status Baru (kosong=skip, cancel=batal): "
                         );
                         if (status == null) {
                             System.out.println(
@@ -294,6 +295,15 @@ public class KelolaMobilMenu {
 
                     }
 
+                    break;
+                case 3:
+                    System.out.print("Yakin ingin menghapus mobil ini? (y/n): ");
+                    if (sc.nextLine().equalsIgnoreCase("y")) {
+                        if (mobilService.deleteMobil(m.getIdMobil())) {
+                            System.out.println("Mobil berhasil dihapus!");
+                            return;
+                        }
+                    }
                     break;
                 case 0:
                     return;

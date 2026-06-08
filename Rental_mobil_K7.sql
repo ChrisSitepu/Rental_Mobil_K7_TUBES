@@ -53,12 +53,15 @@ CREATE TABLE Pegawai( --Fix
     id_pegawai INT IDENTITY(1,1) PRIMARY KEY,
     id_user INT UNIQUE,
     id_jabatan INT,
+    id_cabang INT,
     status VARCHAR(20),
 
     FOREIGN KEY(id_user)
         REFERENCES Users(id_user),
     FOREIGN KEY(id_jabatan)
-        REFERENCES Jabatan(id_jabatan)
+        REFERENCES Jabatan(id_jabatan),
+    FOREIGN KEY(id_cabang)
+        REFERENCES Cabang(id_cabang)
 );
 
 -- Entitas Cabang
@@ -192,14 +195,14 @@ VALUES
 	(2, 'Pegawai');
 
 --Pegawai
-INSERT INTO Pegawai (id_user, id_jabatan, status)
+INSERT INTO Pegawai (id_user, id_jabatan, id_cabang, status)
 VALUES 
-	(1, 1, 'Aktif'),
-    (2, 2, 'Aktif'),
-	(3, 2, 'Nonaktif'),
-	(4, 2, 'Aktif'),
-	(5, 2, 'Aktif'),
-	(6, 2, 'Nonaktif');
+	(1, 1, 1, 'Aktif'), -- Manager -> Jakarta
+    (2, 2, 1, 'Aktif'), -- Pegawai -> Jakarta
+	(3, 2, 2, 'Nonaktif'), -- Budi -> Bekasi
+	(4, 2, 3, 'Aktif'), -- Fajar -> Medan
+	(5, 2, 4, 'Aktif'), -- Luna -> Cimahi
+	(6, 2, 5, 'Nonaktif'); -- Citra -> Bandung
 
 -- Member 
 INSERT INTO Member (id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status)

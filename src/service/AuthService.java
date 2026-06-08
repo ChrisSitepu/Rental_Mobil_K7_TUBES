@@ -21,11 +21,16 @@ public class AuthService {
                 u.email,
                 u.password,
                 u.no_telp,
-
+                u.alamat,
+                m.id_member,
+                m.no_sim,
+                p.id_pegawai,
+                p.id_cabang,
+                j.nama_jabatan,
                 CASE
                     WHEN m.id_member IS NOT NULL THEN 'MEMBER'
-                    WHEN p.id_jabatan = 1 THEN 'MANAGER'
-                    WHEN p.id_jabatan = 2 THEN 'PEGAWAI'
+                    WHEN j.nama_jabatan = 'Manager' THEN 'MANAGER'
+                    WHEN p.id_pegawai IS NOT NULL THEN 'PEGAWAI'
                 END AS role
 
             FROM Users u

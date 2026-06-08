@@ -188,8 +188,8 @@ public class HandleTransaksiMenu {
 
         for (int i = 0; i < list.size(); i++) {
 
+            for (int i = 0; i < list.size(); i++) {
                 Transaksi t = list.get(i);
-
                 System.out.println(
                         (i + 1)
                         + ". "
@@ -330,6 +330,7 @@ public class HandleTransaksiMenu {
                 "\nTekan enter untuk kembali..."
         );
 
+        System.out.println("\nTekan enter untuk kembali...");
         sc.nextLine();
     }
 }
