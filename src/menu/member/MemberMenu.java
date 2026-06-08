@@ -38,7 +38,7 @@ public class MemberMenu {
                     break;
 
                 case 2:
-                    new PengembalianMenu().show();
+                    new PengembalianMenu(user).show();
                     break;
 
                 case 3:

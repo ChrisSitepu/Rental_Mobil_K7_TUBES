@@ -156,7 +156,7 @@ public class PegawaiMenu {
                     break;
 
                 case 2:
-                    new VerifikasiPembayaranMenu()
+                    new VerifikasiPembayaranMenu(user)
                             .show();
                     break;
 

@@ -23,7 +23,7 @@ public class Main {
                 new SignUpMenu().show();
             } 
             else if (input.equals("0")) {
-                System.out.println("Terima kasih telah menggunakan sistem kami. Program selesai.");
+                System.out.println("Terima kasih");
                 break;
             } 
             else {

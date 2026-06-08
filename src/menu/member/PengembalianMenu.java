@@ -2,25 +2,33 @@ package menu.member;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import model.User;
+import model.Transaksi;
+import model.Cabang;
+import service.TransaksiService;
+import service.CabangService;
 
 public class PengembalianMenu {
 
     private Scanner sc = new Scanner(System.in);
+    private User user;
+    private TransaksiService transaksiService = new TransaksiService();
+    private CabangService cabangService = new CabangService();
 
-    public void show(){
+    public PengembalianMenu(User user) {
+        this.user = user;
+    }
+
+    public void show() {
 
         System.out.println(
                 "\n=== PENGEMBALIAN MOBIL ==="
         );
 
-        // dummy transaksi aktif
-        ArrayList<String> transaksiAktif =
-                new ArrayList<>();
+        // Mengambil transaksi aktif dari database
+        ArrayList<Transaksi> transaksiAktif = transaksiService.getTransaksiAktif(user);
 
-        transaksiAktif.add("Toyota Avanza");
-        transaksiAktif.add("Honda Civic");
-
-        if(transaksiAktif.isEmpty()){
+        if (transaksiAktif.isEmpty()) {
 
             System.out.println(
                     "Tidak ada transaksi aktif!"
@@ -33,14 +41,12 @@ public class PengembalianMenu {
                 "\nTransaksi Berlangsung:"
         );
 
-        for(int i = 0;
-            i < transaksiAktif.size();
-            i++){
-
+        for (int i = 0; i < transaksiAktif.size(); i++) {
+            Transaksi t = transaksiAktif.get(i);
             System.out.println(
                     (i + 1)
                     + ". "
-                    + transaksiAktif.get(i)
+                    + t.getNamaMobil() + " [" + t.getPlatMobil() + "]"
             );
         }
 
@@ -48,14 +54,15 @@ public class PengembalianMenu {
                 "\nPilih transaksi: "
         );
 
-        int pilih =
-                Integer.parseInt(sc.nextLine());
+        int pilih;
+        try {
+            pilih = Integer.parseInt(sc.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Input harus berupa angka!");
+            return;
+        }
 
-        if(
-            pilih < 1
-            ||
-            pilih > transaksiAktif.size()
-        ){
+        if (pilih < 1 || pilih > transaksiAktif.size()) {
 
             System.out.println(
                     "Pilihan tidak valid!"
@@ -64,29 +71,20 @@ public class PengembalianMenu {
             return;
         }
 
-        String mobil =
-                transaksiAktif.get(pilih - 1);
+        Transaksi selectedTransaksi = transaksiAktif.get(pilih - 1);
 
-        // dummy cabang
-        ArrayList<String> cabangList =
-                new ArrayList<>();
-
-        cabangList.add("Bandung");
-        cabangList.add("Jakarta");
-        cabangList.add("Surabaya");
+        // Mengambil daftar cabang dari database
+        ArrayList<Cabang> cabangList = cabangService.getAllCabang();
 
         System.out.println(
                 "\nPilih Cabang Pengembalian:"
         );
 
-        for(int i = 0;
-            i < cabangList.size();
-            i++){
-
+        for (int i = 0; i < cabangList.size(); i++) {
             System.out.println(
                     (i + 1)
                     + ". "
-                    + cabangList.get(i)
+                    + cabangList.get(i).getNama()
             );
         }
 
@@ -94,14 +92,15 @@ public class PengembalianMenu {
                 "Pilih cabang: "
         );
 
-        int cabangPilih =
-                Integer.parseInt(sc.nextLine());
+        int cabangPilih;
+        try {
+            cabangPilih = Integer.parseInt(sc.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Input harus berupa angka!");
+            return;
+        }
 
-        if(
-            cabangPilih < 1
-            ||
-            cabangPilih > cabangList.size()
-        ){
+        if (cabangPilih < 1 || cabangPilih > cabangList.size()) {
 
             System.out.println(
                     "Cabang tidak valid!"
@@ -110,33 +109,38 @@ public class PengembalianMenu {
             return;
         }
 
-        String cabang =
-                cabangList.get(cabangPilih - 1);
+        Cabang selectedCabang = cabangList.get(cabangPilih - 1);
 
         System.out.print(
-                "Hari pengembalian: "
+                "Tanggal pengembalian (YYYY-MM-DD): "
         );
 
-        String hari = sc.nextLine();
+        String tanggal = sc.nextLine();
 
         System.out.println(
                 "\n=== DETAIL PENGEMBALIAN ==="
         );
 
         System.out.println(
-                "Mobil   : " + mobil
+                "Mobil   : " + selectedTransaksi.getNamaMobil()
         );
 
         System.out.println(
-                "Cabang  : " + cabang
+                "Plat    : " + selectedTransaksi.getPlatMobil()
         );
 
         System.out.println(
-                "Hari    : " + hari
+                "Cabang  : " + selectedCabang.getNama()
         );
 
         System.out.println(
-                "\nStatus : Menunggu Diproses"
+                "Tanggal : " + tanggal
         );
+
+        System.out.println(
+                "\nStatus : Menunggu Verifikasi Pegawai"
+        );
+        
+        System.out.println("Silahkan serahkan mobil ke cabang tersebut.");
     }
 }
