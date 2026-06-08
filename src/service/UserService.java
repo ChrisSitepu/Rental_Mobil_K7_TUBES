@@ -16,7 +16,7 @@ public class UserService {
 
     public User getUserByEmailAndPassword(String email, String password) {
         String sql = "SELECT u.id_user, u.nama, u.email, u.password, u.no_telp, u.alamat, " +
-                "m.id_member, m.no_sim, p.id_pegawai, j.nama_jabatan " +
+                "m.id_member, m.no_sim, p.id_pegawai, p.id_cabang, j.nama_jabatan " +
                 "FROM Users u " +
                 "LEFT JOIN Member m ON u.id_user = m.id_user " +
                 "LEFT JOIN Pegawai p ON u.id_user = p.id_user " +
@@ -40,6 +40,9 @@ public class UserService {
                     int idPeg = rs.getInt("id_pegawai");
                     if (rs.wasNull()) idPeg = 0;
 
+                    int idCabang = rs.getInt("id_cabang");
+                    if (rs.wasNull()) idCabang = 0;
+
                     if (idPeg > 0) {
                         if (jab != null && jab.trim().equalsIgnoreCase("Manager")) {
                             role = Role.MANAGER;
@@ -58,6 +61,7 @@ public class UserService {
                             rs.getInt("id_user"),
                             idMem,
                             idPeg,
+                            idCabang,
                             rs.getString("nama"),
                             rs.getString("email"),
                             rs.getString("password"),
@@ -181,7 +185,7 @@ public class UserService {
     public ArrayList<User> getAllByRole(Role targetRole) {
         ArrayList<User> list = new ArrayList<>();
 
-        String sql = "SELECT u.*, m.id_member, m.no_sim, p.id_pegawai, j.nama_jabatan " +
+        String sql = "SELECT u.*, m.id_member, m.no_sim, p.id_pegawai, p.id_cabang, j.nama_jabatan " +
                 "FROM Users u " +
                 "LEFT JOIN Member m ON u.id_user = m.id_user " +
                 "LEFT JOIN Pegawai p ON u.id_user = p.id_user " +
@@ -197,6 +201,7 @@ public class UserService {
                 String jab = rs.getString("nama_jabatan");
                 int idMem = rs.getInt("id_member");
                 int idPeg = rs.getInt("id_pegawai");
+                int idCabang = rs.getInt("id_cabang");
 
                 if (idPeg > 0) {
                     if (jab != null && jab.equalsIgnoreCase("Manager")) {
@@ -213,6 +218,7 @@ public class UserService {
                             rs.getInt("id_user"),
                             idMem,
                             idPeg,
+                            idCabang,
                             rs.getString("nama"),
                             rs.getString("email"),
                             rs.getString("password"),
@@ -228,6 +234,23 @@ public class UserService {
         }
 
         return list;
+    }
+
+    public boolean updatePegawaiCabang(int idPegawai, int idCabang) {
+        String sql = "UPDATE Pegawai SET id_cabang = ? WHERE id_pegawai = ?";
+
+        try (Connection conn = SQLDatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idCabang);
+            stmt.setInt(2, idPegawai);
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean deleteUserByEmail(String email) {

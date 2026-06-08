@@ -15,14 +15,14 @@ public class User {
 
 
     private int idPegawai;
-
-
     private int idMember;
+    private int idCabang;
 
     public User(
             int idUser,
             int idMember,
             int idPegawai,
+            int idCabang,
             String nama,
             String email,
             String password,
@@ -34,6 +34,7 @@ public class User {
         this.idUser = idUser;
         this.idMember = idMember;
         this.idPegawai = idPegawai;
+        this.idCabang = idCabang;
         this.nama = nama;
         this.email = email;
         this.password = password;
@@ -54,6 +55,7 @@ public class User {
     this.idUser = 0;
     this.idMember = 0;
     this.idPegawai = 0;
+    this.idCabang = 0;
     this.nama = nama;
     this.email = email;
     this.password = password;
@@ -73,6 +75,14 @@ public class User {
 
     public int getIdPegawai() {
         return idPegawai;
+    }
+
+    public int getIdCabang() {
+        return idCabang;
+    }
+
+    public void setIdCabang(int idCabang) {
+        this.idCabang = idCabang;
     }
 
     public String getNama() {
