@@ -1,61 +1,82 @@
+CREATE DATABASE rental_mobil_kelompok7;
+GO
+
 USE rental_mobil_kelompok7;
+GO
+
+DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS Member;
+DROP TABLE IF EXISTS Jabatan;
+DROP TABLE IF EXISTS Pegawai;
+DROP TABLE IF EXISTS Cabang;
+DROP TABLE IF EXISTS Mobil;
+DROP TABLE IF EXISTS Peminjaman;
+DROP TABLE IF EXISTS Pembayaran;
+DROP TABLE IF EXISTS KondisiMobil;
+DROP TABLE IF EXISTS FotoKondisi;
+DROP TABLE IF EXISTS Bertugas_Di;
+DROP TABLE IF EXISTS Kondisi_Setelah_Sewa;
+
 
 --Entitas USER
-CREATE TABLE Users(
-	id_user INT PRIMARY KEY,
-	nama VARCHAR(100),
-	email VARCHAR(100),
-	no_telp VARCHAR(20),
-	alamat VARCHAR (255),
-	password VARCHAR(100)
+CREATE TABLE Users( --Fix
+    id_user INT IDENTITY(1,1) PRIMARY KEY,
+    nama VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    no_telp VARCHAR(20),
+    alamat VARCHAR(255),
+    password VARCHAR(100),
+    role VARCHAR(20)
 );
+
 --Entitas Member
-CREATE TABLE Member (
+CREATE TABLE Member( --Fix
     id_member INT IDENTITY(1,1) PRIMARY KEY,
-    id_user INT NOT NULL UNIQUE,
+    id_user INT UNIQUE,
     no_sim VARCHAR(30),
     tanggal_berlaku_sim DATE,
     tanggal_daftar DATE,
     status VARCHAR(20),
 
-    FOREIGN KEY (id_user) REFERENCES Users(id_user)
+    FOREIGN KEY(id_user)
+        REFERENCES Users(id_user)
 );
 
-
 --Entitas Jabatan
-
-CREATE TABLE Jabatan(
-	id_jabatan INT PRIMARY KEY,
-	nama_jabatan VARCHAR(50)
+CREATE TABLE Jabatan( --Fix
+    id_jabatan INT PRIMARY KEY,
+    nama_jabatan VARCHAR(50)
 );
 
 --Entitas Pegawai
-CREATE TABLE Pegawai (
-	id_pegawai INT IDENTITY(1,1) PRIMARY KEY,
-	id_user INT,
-	id_jabatan INT,
-	status VARCHAR(20),
-	id_manager INT NULL
+CREATE TABLE Pegawai( --Fix
+    id_pegawai INT IDENTITY(1,1) PRIMARY KEY,
+    id_user INT UNIQUE,
+    id_jabatan INT,
+    status VARCHAR(20),
 
-	FOREIGN KEY (id_user) REFERENCES Users(id_user),
-	FOREIGN KEY (id_jabatan) REFERENCES Jabatan(id_jabatan)
+    FOREIGN KEY(id_user)
+        REFERENCES Users(id_user),
+    FOREIGN KEY(id_jabatan)
+        REFERENCES Jabatan(id_jabatan)
 );
 
-
-
 -- Entitas Cabang
-CREATE TABLE Cabang(
-	id_cabang INT PRIMARY KEY,
-	nama VARCHAR(100),
-	jam_operasional TIME,
-	email VARCHAR(100),
-	no_telepon VARCHAR(20),
-	alamat VARCHAR(100),
+CREATE TABLE Cabang( --fix
+    id_cabang INT IDENTITY(1,1) PRIMARY KEY,
+    nama VARCHAR(100),
+    jam_operasional TIME,
+    email VARCHAR(100),
+    no_telepon VARCHAR(20),
+    alamat VARCHAR(100)
 );
 
 --Entitas Mobil
-CREATE TABLE Mobil(
+CREATE TABLE Mobil( --fix
 	id_mobil INT PRIMARY KEY,
+    nama VARCHAR(100),
+    tarif_sewa DECIMAL(12,2),
+    tarif_denda DECIMAL(12,2),
 	id_cabang INT,
 	no_plat VARCHAR(20),
 	brand VARCHAR(50),
@@ -63,8 +84,7 @@ CREATE TABLE Mobil(
 	warna VARCHAR(30),
 	kapasitas INT,
 	tahun_pembuatan INT,
-	status VARCHAR(20)
-	harga_sewa INT,
+	status VARCHAR(20),
 
 	FOREIGN KEY (id_cabang) REFERENCES Cabang(id_cabang)
 );
@@ -106,17 +126,17 @@ CREATE TABLE Pembayaran(
 );
 
 -- Entitas Kondisi Mobil
-CREATE TABLE KondisiMobil(
-	id_catatan INT PRIMARY KEY,
-	id_pegawai INT,
-	id_transaksi INT,
-	tipe_pencatatan VARCHAR(100),
-	waktu_pencatatan DATETIME,
-	deskripsi VARCHAR(255),
-	tingkat_kondisi INT,
+CREATE TABLE KondisiMobil (
+    id_catatan INT PRIMARY KEY,
+    id_mobil INT,
+    id_pegawai INT,
+    tipe_pencatatan VARCHAR(100),
+    waktu_pencatatan DATETIME,
+    deskripsi VARCHAR(255),
+    tingkat_kondisi INT,
 
-	FOREIGN KEY (id_pegawai) REFERENCES Pegawai (id_pegawai),
-	FOREIGN KEY (id_transaksi) REFERENCES Peminjaman (id_transaksi)
+    FOREIGN KEY (id_mobil) REFERENCES Mobil(id_mobil),
+    FOREIGN KEY (id_pegawai) REFERENCES Pegawai(id_pegawai)
 );
 
 --Entitas Foto Kondisi
@@ -128,13 +148,42 @@ CREATE TABLE FotoKondisi(
 	FOREIGN KEY (id_catatan) REFERENCES KondisiMobil (id_catatan)
 );
 
+--Relasi Bertugas_di
+CREATE TABLE Bertugas_Di (
+    id_pegawai INT,
+    id_cabang INT,
+
+    PRIMARY KEY (id_pegawai, id_cabang),
+
+    FOREIGN KEY (id_pegawai) REFERENCES Pegawai(id_pegawai),
+    FOREIGN KEY (id_cabang) REFERENCES Cabang(id_cabang)
+);
+
+--Relasi Kondisi_setelah_sewa
+CREATE TABLE Kondisi_Setelah_Sewa (
+    id_transaksi INT,
+    id_catatan INT,
+
+    PRIMARY KEY (id_transaksi, id_catatan),
+
+    FOREIGN KEY (id_transaksi) REFERENCES Peminjaman(id_transaksi),
+    FOREIGN KEY (id_catatan) REFERENCES KondisiMobil(id_catatan)
+);
 
 -- Users
-INSERT INTO Users 
-VALUES 
-	(1, 'Manager', 'manager@gmail', '0812345662', 'Bandung', 'Manager'),
-	(2, 'Admin1', 'admin1@gmail.com', '08124858', 'Jakarta', 'admin123'),
-	(3, 'Admin2', 'admin2@gmail.com', '081233215', 'Semarang', 'admin123');
+INSERT INTO Users (nama, email, no_telp, alamat, password, role)
+VALUES
+('manager',	'manager@gmail.com','081234567890',	'Jakarta','admin','MANAGER'),
+('pegawai',	'pegawai@gmail.com','081398765432',	'Ciumbuleuit','pegawai','PEGAWAI'),
+('Budi',	'budi@gmail.com',	'08214211',		'Kemayoran','budi123','PEGAWAI'),
+('Fajar',	'fajar@gmail.com',	'08124613',		'Cimahi','fajar123','PEGAWAI'),
+('Luna',	'luna@gmail.com',	'081461456',	'Kiaracondong','luna123','PEGAWAI'),
+('Citra',	'citra@gmail.com',	'08124444',		'Bekasi','citra123','PEGAWAI'),
+('member',	'member@gmail.com',	'0812345662',	'Bandung','member','MEMBER'),
+('Yosi',	'yosi@gmail.com',	'0815337892',	'Cijerah','yosi123','MEMBER'),
+('Kori',	'kori@gmail.com',	'08124627',		'Antapani','andi123','MEMBER'),
+('Dodo',	'dodo@gmail.com',	'08263162',		'Cempaka Putih','dodo123','MEMBER'),
+('Andi',	'andi@gmail.com',	'08121111',		'Depok','andi123','MEMBER');
 
 -- Jabatan 
 INSERT INTO Jabatan 
@@ -143,296 +192,183 @@ VALUES
 	(2, 'Pegawai');
 
 --Pegawai
-INSERT INTO Pegawai(id_user, id_jabatan, status, id_manager)
-VALUES 
-	(1,1,'Aktif', NULL),
-	
-
-
 INSERT INTO Pegawai (id_user, id_jabatan, status)
-VALUES (2, 1, 'Aktif');
+VALUES 
+	(1, 1, 'Aktif'),
+    (2, 2, 'Aktif'),
+	(3, 2, 'Nonaktif'),
+	(4, 2, 'Aktif'),
+	(5, 2, 'Aktif'),
+	(6, 2, 'Nonaktif');
 
 -- Member 
-INSERT INTO Member 
+INSERT INTO Member (id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status)
 VALUES 
-	(1, 3, 'B123456', '2028-01-01', '2026-05-24', 'Aktif');
+	(7, 'B123456', '2028-01-01', '2023-05-24', 'Aktif'),
+	(8, 'D889900', '2028-03-07', '2025-03-10', 'Aktif'),
+	(9, 'K902342', '2030-05-06', '2026-06-10', 'Nonaktif'),
+	(10, 'F667788', '2026-12-21', '2023-10-12', 'Aktif'),
+	(11, 'J124989', '2027-08-27', '2024-12-10', 'Nonaktif');
 
 --Cabang
-INSERT INTO Cabang 
+INSERT INTO Cabang
+(nama, jam_operasional, email, no_telepon, alamat)
 VALUES
-	(1,'Cabang Jakarta', '08:00:00', 'cabang1@gmail.com', '0811111', 'Jakarta');
+('Cabang Jakarta', '08:00', 'cabang1@gmail.com', '0811111', 'Jakarta'),
+('Cabang Bekasi', '09:00', 'bekasi@gmail.com', '082222', 'Bekasi'),
+('Cabang Medan', '10:00', 'medan@gmail.com', '0833333', 'Medan'),
+('Cabang Cimahi', '09:00', 'cimahi@gmail.com', '0844444', 'Cimahi'),
+('Cabang Bandung', '11:00', 'bandung@gmail.com', '0855555', 'Bandung');
 
 --Mobil
-INSERT INTO Mobil
-VALUES 
-	(1, 1, 'B1234CD', 'Toyota', 'Avanza', 'Hitam', 7, 2022, 'Tersedia');
-
-
--- TES
-SELECT *
-FROM
-	Mobil
-
-UPDATE Users
-SET
-	nama = 'Manager',
-	email = 'Manager@gmailcom',
-	password = 'manager123'
-WHERE id_user = 1;
-
-UPDATE Pegawai
-SET
-	id_manager = 1
-WHERE id_jabatan = 2
-
-
-
-
-UPDATE Users
-SET
-	email = 'manager@gmail.com'
-WHERE 
-	id_user = 1;
-
-
---INSERT USERS untuk master
-INSERT INTO Users 
-VALUES
-(5, 'Pegawai1', 'pegawai1@gmail.com', '0811111111', 'Bandung', 'pegawai123'),
-(6, 'Pegawai2', 'pegawai2@gmail.com', '0822222222', 'Jakarta', 'pegawai123');
-
--- INSERT PEGAWAI
-INSERT INTO Pegawai (id_user, id_jabatan, status, id_manager)
-VALUES
-	(5, 2, 'Aktif', 1),
-	(6, 2, 'Aktif', 1);
--- INSERT MOBIL
---Dieksekusi saat data akan ditambahkan oleh manager ke dalam sistem
-INSERT INTO Mobil
-VALUES
-	(3, 2, 'D1111AA', 'Daihatsu', 'Xenia', 'Putih', 7, 2021, 'Tersedia', 280000),
-	(4, 2, 'D2222BB', 'Toyota', 'Innova', 'Silver', 7, 2022, 'Tersedia', 450000),
-	(5, 3, 'H3333CC', 'Honda', 'Brio', 'Merah', 5, 2020, 'Tersedia', 250000);
-
--- INSERT MEMBER
--- Dieksekusi saat pelanggan melakukan pendaftaran member
-INSERT INTO Users
---
-VALUES
-	(8, 'Member3', 'member3@gmail.com', '0833333333', 'Semarang', 'member123'),
-	(9, 'Member4', 'member4@gmail.com', '0834444444', 'Surabaya', 'member123'),
-	(10, 'Member5', 'member5@gmail.com', '0835555555', 'Yogyakarta', 'member123');
-
-INSERT INTO Member (id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status)
-VALUES
-	(8, 'SIM003', '2028-03-01', '2024-01-03', 'Aktif'),
-	(9, 'SIM004', '2028-04-01', '2024-01-04', 'Aktif'),
-	(10, 'SIM005', '2028-05-01', '2024-01-05', 'Aktif');
--- INSERT CABANG
--- Dieksekusi saat data cabang rental ditambahkan oleh manager
-INSERT INTO Cabang
-VALUES
-(1, 'Cabang Bandung', '08:00:00', 'bandung@rental.com', '022111111', 'Jl. Merdeka No. 10 Bandung'),
-(2, 'Cabang Jakarta', '08:00:00', 'jakarta@rental.com', '021222222', 'Jl. Sudirman No. 20 Jakarta'),
-(3, 'Cabang Semarang', '08:00:00', 'semarang@rental.com', '024333333', 'Jl. Pemuda No. 30 Semarang');
-
-
--- INSERT Peminjaman
--- Dieksekusi saat member melakukan peminjaman kendaraan
-
-INSERT INTO Peminjaman (
-    id_transaksi,
+INSERT INTO Mobil (
     id_mobil,
+    nama,
+    tarif_sewa,
+    tarif_denda,
     id_cabang,
-    id_member,
-    status,
-    total_hari_sewa,
-    catatan,
-    biaya_keterlambatan,
-    biaya_sewa,
-    waktu_rencana_pengembalian,
-    waktu_aktual_pengembalian,
-    total,
-    waktu_pinjam
+    no_plat,
+    brand,
+    tipe,
+    warna,
+    kapasitas,
+    tahun_pembuatan,
+    status
 )
 VALUES
-	(4, 4, 2, 4, 'KEMBALI', 2, 'Peminjaman normal', 0, 900000, '2024-01-06 13:00:00', '2024-01-06 12:00:00', 900000, '2024-01-04 13:00:00'),
-	(5, 5, 3, 5, 'KEMBALI', 2, 'Peminjaman normal', 0, 500000, '2024-01-07 14:00:00', '2024-01-07 13:00:00', 500000, '2024-01-05 14:00:00'),
-	(6, 1, 1, 1, 'KEMBALI', 3, 'Peminjaman normal', 0, 900000, '2024-01-10 10:00:00', '2024-01-10 09:00:00', 900000, '2024-01-07 10:00:00'),
-	(7, 2, 1, 2, 'KEMBALI', 1, 'Peminjaman harian', 0, 300000, '2024-01-09 11:00:00', '2024-01-09 10:30:00', 300000, '2024-01-08 11:00:00'),
-	(8, 3, 2, 3, 'KEMBALI', 4, 'Peminjaman normal', 0, 1120000, '2024-01-14 09:00:00', '2024-01-14 08:45:00', 1120000, '2024-01-10 09:00:00'),
-	(9, 4, 2, 4, 'KEMBALI', 2, 'Peminjaman normal', 0, 900000, '2024-01-13 13:00:00', '2024-01-13 12:30:00', 900000, '2024-01-11 13:00:00'),
-	(10, 5, 3, 5, 'KEMBALI', 3, 'Peminjaman normal', 0, 750000, '2024-01-16 14:00:00', '2024-01-16 13:30:00', 750000, '2024-01-13 14:00:00'),
+(1, 'Toyota Innova', 500000, 75000, 1, 'B5555DD', 'Toyota', 'MPV', 'Hitam', 8, 2021, 'Tidak Tersedia'),
+(2, 'Honda Jazz', 350000, 50000, 2, 'D6666EE', 'Honda', 'Hatchback', 'Kuning', 5, 2019, 'Tersedia'),
+(3, 'Wuling Almaz', 450000, 60000, 2, 'A1111CC', 'Wuling', 'SUV', 'Putih', 4, 2022, 'Tersedia'),
+(4, 'Mitsubishi Xpander', 550000, 75000, 3, 'L7777FF', 'Mitsubishi', 'MPV', 'Putih', 7, 2024, 'Tidak Tersedia'),
+(5, 'Suzuki Carry', 250000, 40000, 1, 'B8888GG', 'Suzuki', 'Minivan', 'Silver', 2, 2018, 'Tidak Tersedia'),
+(6, 'Wuling Air EV', 300000, 50000, 2, 'Z3333KK', 'Wuling', 'Hatchback', 'Putih', 2, 2023, 'Tersedia'),
+(7, 'Mazda Hatchback', 600000, 80000, 4, 'W0000DD', 'Mazda', 'Hatchback', 'Merah', 8, 2021, 'Tersedia'),
+(8, 'Toyota Fortuner', 850000, 100000, 3, 'D9999HH', 'Toyota', 'SUV', 'Hitam', 7, 2025, 'Tersedia'),
+(9, 'Toyota Fortuner', 850000, 100000, 3, 'O2222WW', 'Toyota', 'SUV', 'Hitam', 7, 2025, 'Tersedia'),
+(10, 'Toyota Fortuner', 850000, 100000, 4, 'E3333RR', 'Toyota', 'SUV', 'Hitam', 7, 2025, 'Tidak Tersedia'),
+(11, 'Toyota Fortuner', 850000, 100000, 1, 'T7777KK', 'Toyota', 'SUV', 'Hitam', 7, 2025, 'Tersedia'),
+(12, 'Honda Brio', 300000, 50000, 5, 'D1111AA', 'Honda', 'Hatchback', 'Merah', 5, 2022, 'Tersedia'),
+(13, 'Toyota Avanza', 400000, 60000, 1, 'B2222BB', 'Toyota', 'MPV', 'Silver', 7, 2023, 'Tersedia'),
+(14, 'Daihatsu Xenia', 380000, 55000, 2, 'D3333CC', 'Daihatsu', 'MPV', 'Hitam', 7, 2021, 'Tidak Tersedia'),
+(15, 'Toyota Rush', 500000, 70000, 3, 'BK4444DD', 'Toyota', 'SUV', 'Putih', 7, 2024, 'Tersedia'),
+(16, 'Suzuki Ertiga', 420000, 60000, 4, 'F5555EE', 'Suzuki', 'MPV', 'Abu-Abu', 7, 2022, 'Tersedia'),
+(17, 'Honda HR-V', 650000, 85000, 5, 'B6666FF', 'Honda', 'SUV', 'Hitam', 5, 2024, 'Tersedia'),
+(18, 'Toyota Raize', 550000, 75000, 1, 'D7777GG', 'Toyota', 'SUV', 'Kuning', 5, 2023, 'Tidak Tersedia'),
+(19, 'Hyundai Creta', 700000, 90000, 2, 'BK8888HH', 'Hyundai', 'SUV', 'Putih', 5, 2025, 'Tersedia'),
+(20, 'Kia Sonet', 680000, 90000, 3, 'L9999II', 'Kia', 'SUV', 'Biru', 5, 2024, 'Tersedia'),
+(21, 'Mitsubishi Pajero', 950000, 120000, 4, 'B1234PJ', 'Mitsubishi', 'SUV', 'Hitam', 7, 2025, 'Tidak Tersedia'),
+(22, 'Toyota Alphard', 1500000, 200000, 5, 'D5678AL', 'Toyota', 'MPV', 'Putih', 7, 2025, 'Tersedia'),
+(23, 'BMW X1', 1800000, 250000, 1, 'B9876BM', 'BMW', 'SUV', 'Abu-Abu', 5, 2024, 'Tersedia'),
+(24, 'Mercedes GLA', 2200000, 300000, 2, 'D5432MC', 'Mercedes', 'SUV', 'Hitam', 5, 2025, 'Tersedia'),
+(25, 'Tesla Model 3', 2500000, 350000, 3, 'B7777TS', 'Tesla', 'Sedan', 'Putih', 5, 2025, 'Tidak Tersedia');
 
-	(11, 1, 1, 2, 'KEMBALI', 1, 'Peminjaman harian', 0, 300000, '2024-02-02 10:00:00', '2024-02-02 09:50:00', 300000, '2024-02-01 10:00:00'),
-	(12, 2, 1, 3, 'KEMBALI', 2, 'Peminjaman normal', 0, 600000, '2024-02-04 11:00:00', '2024-02-04 10:45:00', 600000, '2024-02-02 11:00:00'),
-	(13, 3, 2, 4, 'KEMBALI', 2, 'Peminjaman normal', 0, 560000, '2024-02-05 09:00:00', '2024-02-05 08:30:00', 560000, '2024-02-03 09:00:00'),
-	(14, 4, 2, 5, 'KEMBALI', 3, 'Peminjaman normal', 0, 1350000, '2024-02-07 13:00:00', '2024-02-07 12:30:00', 1350000, '2024-02-04 13:00:00'),
-	(15, 5, 3, 1, 'KEMBALI', 1, 'Peminjaman harian', 0, 250000, '2024-02-06 14:00:00', '2024-02-06 13:20:00', 250000, '2024-02-05 14:00:00'),
-
-	(16, 1, 1, 2, 'KEMBALI', 4, 'Terlambat 1 hari', 50000, 1200000, '2024-02-12 10:00:00', '2024-02-13 10:00:00', 1250000, '2024-02-08 10:00:00'),
-	(17, 2, 1, 3, 'KEMBALI', 2, 'Peminjaman normal', 0, 600000, '2024-02-12 11:00:00', '2024-02-12 10:00:00', 600000, '2024-02-10 11:00:00'),
-	(18, 3, 2, 4, 'KEMBALI', 3, 'Peminjaman normal', 0, 840000, '2024-02-15 09:00:00', '2024-02-15 08:40:00', 840000, '2024-02-12 09:00:00'),
-	(19, 4, 2, 5, 'KEMBALI', 1, 'Peminjaman harian', 0, 450000, '2024-02-14 13:00:00', '2024-02-14 12:45:00', 450000, '2024-02-13 13:00:00'),
-	(20, 5, 3, 1, 'KEMBALI', 2, 'Peminjaman normal', 0, 500000, '2024-02-17 14:00:00', '2024-02-17 13:30:00', 500000, '2024-02-15 14:00:00'),
-
-	(21, 1, 1, 2, 'DIPINJAM', 2, 'Sedang dipinjam', 0, 600000, '2024-03-03 10:00:00', NULL, 600000, '2024-03-01 10:00:00'),
-	(22, 2, 1, 3, 'DIPINJAM', 3, 'Sedang dipinjam', 0, 900000, '2024-03-05 11:00:00', NULL, 900000, '2024-03-02 11:00:00'),
-	(23, 3, 2, 4, 'KEMBALI', 2, 'Peminjaman normal', 0, 560000, '2024-03-05 09:00:00', '2024-03-05 08:50:00', 560000, '2024-03-03 09:00:00'),
-	(24, 4, 2, 5, 'KEMBALI', 2, 'Peminjaman normal', 0, 900000, '2024-03-06 13:00:00', '2024-03-06 12:30:00', 900000, '2024-03-04 13:00:00'),
-	(25, 5, 3, 1, 'KEMBALI', 3, 'Peminjaman normal', 0, 750000, '2024-03-08 14:00:00', '2024-03-08 13:45:00', 750000, '2024-03-05 14:00:00'),
-
-	(26, 1, 1, 2, 'KEMBALI', 1, 'Peminjaman harian', 0, 300000, '2024-03-08 10:00:00', '2024-03-08 09:30:00', 300000, '2024-03-07 10:00:00'),
-	(27, 2, 1, 3, 'KEMBALI', 2, 'Peminjaman normal', 0, 600000, '2024-03-10 11:00:00', '2024-03-10 10:45:00', 600000, '2024-03-08 11:00:00'),
-	(28, 3, 2, 4, 'KEMBALI', 4, 'Terlambat 1 hari', 50000, 1120000, '2024-03-13 09:00:00', '2024-03-14 09:00:00', 1170000, '2024-03-09 09:00:00'),
-	(29, 4, 2, 5, 'KEMBALI', 1, 'Peminjaman harian', 0, 450000, '2024-03-11 13:00:00', '2024-03-11 12:50:00', 450000, '2024-03-10 13:00:00'),
-	(30, 5, 3, 1, 'KEMBALI', 2, 'Peminjaman normal', 0, 500000, '2024-03-13 14:00:00', '2024-03-13 13:30:00', 500000, '2024-03-11 14:00:00');
-
-
--- INSERT Pembayaran
--- Dieksekusi saat member melakukan pembayaran transaksi peminjaman kendaraan
-
-INSERT INTO Pembayaran (
-    id_pembayaran,
-    id_transaksi,
-    id_pegawai,
-    waktu_pembayaran,
-    status,
-    jumlah,
-    Metode
-)
+INSERT INTO Bertugas_Di (id_pegawai, id_cabang)
 VALUES
-	(1, 1, 2, '2024-01-01 10:10:00', 'LUNAS', 600000, 'Tunai'),
-	(2, 2, 3, '2024-01-02 11:10:00', 'LUNAS', 900000, 'Transfer'),
-	(3, 3, 4, '2024-01-03 09:10:00', 'LUNAS', 280000, 'Tunai'),
-	(4, 4, 5, '2024-01-04 13:10:00', 'LUNAS', 900000, 'Transfer'),
-	(5, 5, 2, '2024-01-05 14:10:00', 'LUNAS', 500000, 'Tunai'),
+(1,1), -- Manager -> Jakarta
+(2,1), -- Pegawai -> Jakarta
+(3,2), -- Budi -> Bekasi
+(4,3), -- Fajar -> Medan
+(5,4), -- Luna -> Cimahi
+(6,5); -- Citra -> Bandung
 
-	(6, 6, 3, '2024-01-07 10:15:00', 'LUNAS', 900000, 'Transfer'),
-	(7, 7, 4, '2024-01-08 11:15:00', 'LUNAS', 300000, 'Tunai'),
-	(8, 8, 5, '2024-01-10 09:15:00', 'LUNAS', 1120000, 'Transfer'),
-	(9, 9, 2, '2024-01-11 13:15:00', 'LUNAS', 900000, 'Tunai'),
-	(10, 10, 3, '2024-01-13 14:15:00', 'LUNAS', 750000, 'Transfer'),
-
-	(11, 11, 4, '2024-02-01 10:15:00', 'LUNAS', 300000, 'Tunai'),
-	(12, 12, 5, '2024-02-02 11:15:00', 'LUNAS', 600000, 'Transfer'),
-	(13, 13, 2, '2024-02-03 09:15:00', 'LUNAS', 560000, 'Tunai'),
-	(14, 14, 3, '2024-02-04 13:15:00', 'LUNAS', 1350000, 'Transfer'),
-	(15, 15, 4, '2024-02-05 14:15:00', 'LUNAS', 250000, 'Tunai'),
-
-	(16, 16, 5, '2024-02-08 10:15:00', 'LUNAS', 1250000, 'Transfer'),
-	(17, 17, 2, '2024-02-10 11:15:00', 'LUNAS', 600000, 'Tunai'),
-	(18, 18, 3, '2024-02-12 09:15:00', 'LUNAS', 840000, 'Transfer'),
-	(19, 19, 4, '2024-02-13 13:15:00', 'LUNAS', 450000, 'Tunai'),
-	(20, 20, 5, '2024-02-15 14:15:00', 'LUNAS', 500000, 'Transfer'),
-
-	(21, 21, 2, '2024-03-01 10:15:00', 'LUNAS', 600000, 'Tunai'),
-	(22, 22, 3, '2024-03-02 11:15:00', 'LUNAS', 900000, 'Transfer'),
-	(23, 23, 4, '2024-03-03 09:15:00', 'LUNAS', 560000, 'Tunai'),
-	(24, 24, 5, '2024-03-04 13:15:00', 'LUNAS', 900000, 'Transfer'),
-	(25, 25, 2, '2024-03-05 14:15:00', 'LUNAS', 750000, 'Tunai'),
-
-	(26, 26, 3, '2024-03-07 10:15:00', 'LUNAS', 300000, 'Transfer'),
-	(27, 27, 4, '2024-03-08 11:15:00', 'LUNAS', 600000, 'Tunai'),
-	(28, 28, 5, '2024-03-09 09:15:00', 'LUNAS', 1170000, 'Transfer'),
-	(29, 29, 2, '2024-03-10 13:15:00', 'LUNAS', 450000, 'Tunai'),
-	(30, 30, 3, '2024-03-11 14:15:00', 'LUNAS', 500000, 'Transfer');
-
-
-
--- INSERT KondisiMobil
--- Dieksekusi saat pegawai mencatat kondisi mobil sebelum atau sesudah peminjaman
-
-INSERT INTO KondisiMobil (
-    id_catatan,
-    id_pegawai,
-    id_transaksi,
-    tipe_pencatatan,
-    waktu_pencatatan,
-    deskripsi,
-    tingkat_kondisi
-)
+INSERT INTO KondisiMobil
+(id_catatan,id_mobil,id_pegawai,tipe_pencatatan,waktu_pencatatan,deskripsi,tingkat_kondisi)
 VALUES
-	(1, 2, 1, 'SESUDAH PENGEMBALIAN', '2024-01-03 09:40:00', 'Mobil kembali dalam kondisi baik', 8),
-	(2, 3, 2, 'SESUDAH PENGEMBALIAN', '2024-01-05 10:20:00', 'Mobil kembali tanpa kerusakan', 8),
-	(3, 4, 3, 'SESUDAH PENGEMBALIAN', '2024-01-04 08:45:00', 'Mobil dalam kondisi baik', 9),
-	(4, 5, 4, 'SESUDAH PENGEMBALIAN', '2024-01-06 12:20:00', 'Mobil kembali normal', 8),
-	(5, 2, 5, 'SESUDAH PENGEMBALIAN', '2024-01-07 13:20:00', 'Mobil bersih dan baik', 9),
+(1,1,2,'Sebelum Sewa','2025-01-01 08:00','Kondisi sangat baik',95),
+(2,4,4,'Sebelum Sewa','2025-01-02 09:00','Body mulus',90),
+(3,5,2,'Sebelum Sewa','2025-01-03 10:00','Ban baru diganti',92),
+(4,10,5,'Sebelum Sewa','2025-01-04 08:30','Interior bersih',96),
+(5,14,2,'Sebelum Sewa','2025-01-05 09:30','Ada goresan kecil',85),
+(6,18,4,'Sebelum Sewa','2025-01-06 10:00','Mesin normal',94),
+(7,21,5,'Sebelum Sewa','2025-01-07 08:00','Cat masih bagus',91),
+(8,25,4,'Sebelum Sewa','2025-01-08 09:00','Mobil sangat prima',98);
 
-	(6, 3, 6, 'SESUDAH PENGEMBALIAN', '2024-01-10 09:20:00', 'Mobil kembali dalam kondisi baik', 8),
-	(7, 4, 7, 'SESUDAH PENGEMBALIAN', '2024-01-09 10:45:00', 'Mobil tidak mengalami kerusakan', 9),
-	(8, 5, 8, 'SESUDAH PENGEMBALIAN', '2024-01-14 09:00:00', 'Mobil kembali normal', 8),
-	(9, 2, 9, 'SESUDAH PENGEMBALIAN', '2024-01-13 12:45:00', 'Mobil dalam kondisi baik', 8),
-	(10, 3, 10, 'SESUDAH PENGEMBALIAN', '2024-01-16 13:45:00', 'Mobil kembali bersih', 9),
-
-	(11, 4, 11, 'SESUDAH PENGEMBALIAN', '2024-02-02 10:05:00', 'Mobil dalam kondisi baik', 8),
-	(12, 5, 12, 'SESUDAH PENGEMBALIAN', '2024-02-04 11:00:00', 'Mobil kembali normal', 8),
-	(13, 2, 13, 'SESUDAH PENGEMBALIAN', '2024-02-05 08:45:00', 'Mobil tidak ada kerusakan', 9),
-	(14, 3, 14, 'SESUDAH PENGEMBALIAN', '2024-02-07 12:45:00', 'Mobil dalam kondisi baik', 8),
-	(15, 4, 15, 'SESUDAH PENGEMBALIAN', '2024-02-06 13:35:00', 'Mobil kembali bersih', 9),
-
-	(16, 5, 16, 'SESUDAH PENGEMBALIAN', '2024-02-13 10:20:00', 'Mobil terlambat dikembalikan namun kondisi baik', 7),
-	(17, 2, 17, 'SESUDAH PENGEMBALIAN', '2024-02-12 10:20:00', 'Mobil kembali normal', 8),
-	(18, 3, 18, 'SESUDAH PENGEMBALIAN', '2024-02-15 09:00:00', 'Mobil dalam kondisi baik', 8),
-	(19, 4, 19, 'SESUDAH PENGEMBALIAN', '2024-02-14 13:00:00', 'Mobil tidak mengalami kerusakan', 9),
-	(20, 5, 20, 'SESUDAH PENGEMBALIAN', '2024-02-17 13:45:00', 'Mobil kembali bersih', 9),
-
-	(21, 2, 21, 'SEBELUM PEMINJAMAN', '2024-03-01 09:30:00', 'Mobil dicek sebelum dipinjam', 8),
-	(22, 3, 22, 'SEBELUM PEMINJAMAN', '2024-03-02 10:30:00', 'Mobil siap digunakan', 8),
-	(23, 4, 23, 'SESUDAH PENGEMBALIAN', '2024-03-05 09:10:00', 'Mobil kembali dalam kondisi baik', 8),
-	(24, 5, 24, 'SESUDAH PENGEMBALIAN', '2024-03-06 12:45:00', 'Mobil kembali normal', 8),
-	(25, 2, 25, 'SESUDAH PENGEMBALIAN', '2024-03-08 14:00:00', 'Mobil bersih dan baik', 9),
-
-	(26, 3, 26, 'SESUDAH PENGEMBALIAN', '2024-03-08 09:45:00', 'Mobil tidak mengalami kerusakan', 9),
-	(27, 4, 27, 'SESUDAH PENGEMBALIAN', '2024-03-10 11:00:00', 'Mobil kembali normal', 8),
-	(28, 5, 28, 'SESUDAH PENGEMBALIAN', '2024-03-14 09:20:00', 'Mobil terlambat dikembalikan namun kondisi baik', 7),
-	(29, 2, 29, 'SESUDAH PENGEMBALIAN', '2024-03-11 13:05:00', 'Mobil dalam kondisi baik', 8),
-	(30, 3, 30, 'SESUDAH PENGEMBALIAN', '2024-03-13 13:45:00', 'Mobil kembali bersih', 9);
-
--- INSERT FotoKondisi
--- Dieksekusi saat pegawai mengunggah foto bukti kondisi mobil
-
-INSERT INTO FotoKondisi (
-    id_foto,
-    id_catatan,
-    foto
-)
+INSERT INTO FotoKondisi
+(id_foto,id_catatan,foto)
 VALUES
-	(1, 1, 'foto_kondisi_001.jpg'),
-	(2, 2, 'foto_kondisi_002.jpg'),
-	(3, 3, 'foto_kondisi_003.jpg'),
-	(4, 4, 'foto_kondisi_004.jpg'),
-	(5, 5, 'foto_kondisi_005.jpg'),
+(1,1,'innova1.jpg'),
+(2,2,'xpander1.jpg'),
+(3,3,'carry1.jpg'),
+(4,4,'fortuner1.jpg'),
+(5,5,'xenia1.jpg'),
+(6,6,'raize1.jpg'),
+(7,7,'pajero1.jpg'),
+(8,8,'tesla1.jpg');
 
-	(6, 6, 'foto_kondisi_006.jpg'),
-	(7, 7, 'foto_kondisi_007.jpg'),
-	(8, 8, 'foto_kondisi_008.jpg'),
-	(9, 9, 'foto_kondisi_009.jpg'),
-	(10, 10, 'foto_kondisi_010.jpg'),
+INSERT INTO Peminjaman
+(id_transaksi,id_mobil,id_cabang,id_member,status,total_hari_sewa,
+catatan,biaya_keterlambatan,biaya_sewa,
+waktu_rencana_pengembalian,waktu_aktual_pengembalian,total,waktu_pinjam)
+VALUES
+(1,1,1,1,'Selesai',3,'-',0,1500000,'2025-01-04','2025-01-04',1500000,'2025-01-01'),
+(2,4,3,2,'Selesai',2,'-',0,1100000,'2025-01-05','2025-01-05',1100000,'2025-01-03'),
+(3,5,1,4,'Selesai',5,'-',40000,1250000,'2025-01-10','2025-01-11',1290000,'2025-01-05'),
+(4,10,4,1,'Selesai',2,'-',0,1700000,'2025-01-08','2025-01-08',1700000,'2025-01-06'),
+(5,14,2,2,'Selesai',4,'-',55000,1520000,'2025-01-12','2025-01-13',1575000,'2025-01-08'),
 
-	(11, 11, 'foto_kondisi_011.jpg'),
-	(12, 12, 'foto_kondisi_012.jpg'),
-	(13, 13, 'foto_kondisi_013.jpg'),
-	(14, 14, 'foto_kondisi_014.jpg'),
-	(15, 15, 'foto_kondisi_015.jpg'),
+(6,2,2,1,'Selesai',2,'-',0,700000,'2025-02-03','2025-02-03',700000,'2025-02-01'),
+(7,3,2,2,'Selesai',3,'-',0,1350000,'2025-02-05','2025-02-05',1350000,'2025-02-02'),
+(8,6,2,4,'Selesai',1,'-',0,300000,'2025-02-04','2025-02-04',300000,'2025-02-03'),
+(9,7,4,1,'Selesai',4,'-',80000,2400000,'2025-02-10','2025-02-11',2480000,'2025-02-06'),
+(10,8,3,2,'Selesai',2,'-',0,1700000,'2025-02-08','2025-02-08',1700000,'2025-02-06'),
 
-	(16, 16, 'foto_kondisi_016.jpg'),
-	(17, 17, 'foto_kondisi_017.jpg'),
-	(18, 18, 'foto_kondisi_018.jpg'),
-	(19, 19, 'foto_kondisi_019.jpg'),
-	(20, 20, 'foto_kondisi_020.jpg'),
+(11,9,3,4,'Selesai',2,'-',0,1700000,'2025-02-09','2025-02-09',1700000,'2025-02-07'),
+(12,11,1,1,'Selesai',3,'-',100000,2550000,'2025-02-12','2025-02-13',2650000,'2025-02-09'),
+(13,12,5,2,'Selesai',4,'-',0,1200000,'2025-02-15','2025-02-15',1200000,'2025-02-11'),
+(14,13,1,4,'Selesai',3,'-',0,1200000,'2025-02-14','2025-02-14',1200000,'2025-02-11'),
+(15,15,3,1,'Selesai',2,'-',70000,1000000,'2025-02-16','2025-02-17',1070000,'2025-02-14'),
 
-	(21, 21, 'foto_kondisi_021.jpg'),
-	(22, 22, 'foto_kondisi_022.jpg'),
-	(23, 23, 'foto_kondisi_023.jpg'),
-	(24, 24, 'foto_kondisi_024.jpg'),
-	(25, 25, 'foto_kondisi_025.jpg'),
+(16,16,4,2,'Selesai',5,'-',0,2100000,'2025-03-01','2025-03-01',2100000,'2025-02-24'),
+(17,17,5,4,'Selesai',3,'-',85000,1950000,'2025-03-03','2025-03-04',2035000,'2025-02-28'),
+(18,19,2,1,'Selesai',2,'-',0,1400000,'2025-03-05','2025-03-05',1400000,'2025-03-03'),
+(19,20,3,2,'Selesai',4,'-',90000,2720000,'2025-03-09','2025-03-10',2810000,'2025-03-05'),
+(20,22,5,4,'Selesai',2,'-',0,3000000,'2025-03-08','2025-03-08',3000000,'2025-03-06'),
 
-	(26, 26, 'foto_kondisi_026.jpg'),
-	(27, 27, 'foto_kondisi_027.jpg'),
-	(28, 28, 'foto_kondisi_028.jpg'),
-	(29, 29, 'foto_kondisi_029.jpg'),
-	(30, 30, 'foto_kondisi_030.jpg');
+(21,23,1,1,'Selesai',3,'-',0,5400000,'2025-03-12','2025-03-12',5400000,'2025-03-09'),
+(22,24,2,2,'Selesai',2,'-',300000,4400000,'2025-03-11','2025-03-12',4700000,'2025-03-09'),
+(23,25,3,4,'Selesai',1,'-',0,2500000,'2025-03-10','2025-03-10',2500000,'2025-03-09'),
+(24,2,2,1,'Selesai',2,'-',0,700000,'2025-04-03','2025-04-03',700000,'2025-04-01'),
+(25,3,2,2,'Selesai',3,'-',0,1350000,'2025-04-05','2025-04-05',1350000,'2025-04-02'),
 
+(26,6,2,4,'Selesai',4,'-',50000,1200000,'2025-04-08','2025-04-09',1250000,'2025-04-04'),
+(27,7,4,1,'Selesai',2,'-',0,1200000,'2025-04-07','2025-04-07',1200000,'2025-04-05'),
+(28,8,3,2,'Selesai',5,'-',100000,4250000,'2025-04-12','2025-04-13',4350000,'2025-04-07'),
+(29,11,1,4,'Selesai',3,'-',0,2550000,'2025-04-10','2025-04-10',2550000,'2025-04-07'),
+(30,12,5,1,'Selesai',2,'-',0,600000,'2025-04-12','2025-04-12',600000,'2025-04-10'),
 
-	
+(31,13,1,2,'Diproses',4,'-',0,1600000,'2026-06-15',NULL,1600000,'2026-06-11'),
+(32,15,3,4,'Diproses',3,'-',0,1500000,'2026-06-14',NULL,1500000,'2026-06-11'),
+(33,17,5,1,'Diproses',2,'-',0,1300000,'2026-06-13',NULL,1300000,'2026-06-11'),
+(34,20,3,2,'Diproses',2,'-',0,1360000,'2026-06-13',NULL,1360000,'2026-06-11'),
+(35,22,5,4,'Diproses',1,'-',0,1500000,'2026-06-12',NULL,1500000,'2026-06-11');
+
+INSERT INTO Pembayaran
+(id_pembayaran,id_transaksi,id_pegawai,waktu_pembayaran,status,jumlah,Metode)
+SELECT
+id_transaksi,
+id_transaksi,
+CASE
+    WHEN id_transaksi % 4 = 0 THEN 4
+    WHEN id_transaksi % 3 = 0 THEN 5
+    ELSE 2
+END,
+DATEADD(HOUR,2,waktu_pinjam),
+'Lunas',
+total,
+CASE
+    WHEN id_transaksi % 3 = 0 THEN 'Transfer'
+    WHEN id_transaksi % 2 = 0 THEN 'QRIS'
+    ELSE 'Cash'
+END
+FROM Peminjaman;
+
+INSERT INTO Kondisi_Setelah_Sewa
+(id_transaksi,id_catatan)
+VALUES
+(1,1),(2,2),(3,3),(4,4),(5,5),
+(6,6),(7,7),(8,8),(9,1),(10,2),
+(11,3),(12,4),(13,5),(14,6),(15,7),
+(16,8),(17,1),(18,2),(19,3),(20,4),
+(21,5),(22,6),(23,7),(24,8),(25,1),
+(26,2),(27,3),(28,4),(29,5),(30,6),
+(31,7),(32,8),(33,1),(34,2),(35,3);

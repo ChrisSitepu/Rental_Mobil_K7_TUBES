@@ -1,124 +1,169 @@
 package service;
 
-import config.SQLDatabaseConnection;
-import model.Mobil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
+import config.SQLDatabaseConnection;
+import model.Mobil;
+
 public class MobilService {
-
     public ArrayList<Mobil> getAllMobil() {
-        ArrayList<Mobil> list = new ArrayList<>();
-        String sql = "SELECT * FROM Mobil";
 
-        try (Connection conn = SQLDatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                ResultSet rs = stmt.executeQuery()) {
+        ArrayList<Mobil> mobilList = new ArrayList<>();
+
+        String sql = "SELECT *\n" + //
+                        "FROM Mobil\n" + //
+                        "ORDER BY brand, nama;";
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
 
             while (rs.next()) {
-                list.add(new Mobil(
+
+                Mobil m = new Mobil(
                         rs.getInt("id_mobil"),
                         rs.getInt("id_cabang"),
+                        rs.getString("nama"),
                         rs.getString("brand"),
                         rs.getString("tipe"),
                         rs.getString("warna"),
                         rs.getString("no_plat"),
+                        rs.getString("status"),
                         rs.getInt("kapasitas"),
                         rs.getInt("tahun_pembuatan"),
-                        rs.getString("status").equalsIgnoreCase("Tersedia"),
-                        rs.getInt("harga_sewa")));
+                        rs.getDouble("tarif_sewa"),
+                        rs.getDouble("tarif_denda")
+                );
+
+                mobilList.add(m);
             }
-        } catch (SQLException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return list;
-    }
 
-    public boolean addMobil(Mobil m, int idCabang) {
-        String sql = "INSERT INTO Mobil (id_mobil, id_cabang, no_plat, brand, tipe, warna, kapasitas, tahun_pembuatan, status, harga_sewa) "
-                +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = SQLDatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            int nextId = getNextMobilId(conn);
-            stmt.setInt(1, nextId);
-            stmt.setInt(2, idCabang);
-            stmt.setString(3, m.getPlat());
-            stmt.setString(4, m.getBrand());
-            stmt.setString(5, m.getTipe());
-            stmt.setString(6, m.getWarna());
-            stmt.setInt(7, m.getKapasitas());
-            stmt.setInt(8, m.getTahunPembuatan());
-            stmt.setString(9, m.isAvailable() ? "Tersedia" : "Dipinjam");
-            stmt.setInt(10, m.getTarifSewa());
-
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean updateMobilRate(String plat, int newRate) {
-        String sql = "UPDATE Mobil SET harga_sewa = ? WHERE no_plat = ?";
-        try (Connection conn = SQLDatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, newRate);
-            stmt.setString(2, plat);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean updateMobilStatus(String plat, String status) {
-        String sql = "UPDATE Mobil SET status = ? WHERE no_plat = ?";
-        try (Connection conn = SQLDatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, status);
-            stmt.setString(2, plat);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean deleteMobil(String plat) {
-        String sql = "DELETE FROM Mobil WHERE no_plat = ?";
-        try (Connection conn = SQLDatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, plat);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private int getNextMobilId(Connection conn) throws SQLException {
-        String sql = "SELECT MAX(id_mobil) FROM Mobil";
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-                ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1) + 1;
-            }
-        }
-        return 1;
+        return mobilList;
     }
 
     public ArrayList<Mobil> getAvailableMobil() {
-        ArrayList<Mobil> list = new ArrayList<>();
+
+        ArrayList<Mobil> available = new ArrayList<>();
+
         for (Mobil m : getAllMobil()) {
-            if (m.isAvailable()) {
-                list.add(m);
+
+            if ("Tersedia".equalsIgnoreCase(m.getStatus())) {
+                available.add(m);
             }
         }
-        return list;
+
+        return available;
+    }
+
+    public boolean addMobil(Mobil mobil) {
+
+        String sql =
+            "INSERT INTO Mobil " +
+            "(id_mobil,nama,tarif_sewa,tarif_denda,id_cabang,no_plat,brand,tipe,warna,kapasitas,tahun_pembuatan,status) " +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, mobil.getIdMobil());
+            ps.setString(2, mobil.getNama());
+            ps.setDouble(3, mobil.getTarifSewa());
+            ps.setDouble(4, mobil.getTarifDenda());
+            ps.setInt(5, mobil.getIdCabang());
+            ps.setString(6, mobil.getPlat());
+            ps.setString(7, mobil.getBrand());
+            ps.setString(8, mobil.getTipe());
+            ps.setString(9, mobil.getWarna());
+            ps.setInt(10, mobil.getKapasitas());
+            ps.setInt(11, mobil.getTahunPembuatan());
+            ps.setString(12, mobil.getStatus());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean updateMobilStatus(
+            int idMobil,
+            String status) {
+
+        String sql =
+            "UPDATE Mobil SET status=? WHERE id_mobil=?";
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, status);
+            ps.setInt(2, idMobil);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean updateMobilRate(
+            int idMobil,
+            double tarifSewa) {
+
+        String sql =
+            "UPDATE Mobil SET tarif_sewa=? WHERE id_mobil=?";
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setDouble(1, tarifSewa);
+            ps.setInt(2, idMobil);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean deleteMobil(int idMobil) {
+
+        String sql =
+            "DELETE FROM Mobil WHERE id_mobil=?";
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, idMobil);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

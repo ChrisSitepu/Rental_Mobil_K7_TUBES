@@ -41,7 +41,7 @@ public class ManagerMenu {
             );
 
             System.out.println(
-                    "5. Kelola Tarif"
+                    "5. Kelola Mobil"
             );
 
             System.out.println(
