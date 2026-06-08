@@ -27,6 +27,14 @@ public class User {
         this.role = role;
     }
 
+    public int getIdCabang() {
+        return idCabang;
+    }
+
+    public void setIdCabang(int idCabang) {
+        this.idCabang = idCabang;
+    }
+
     public String getNama() {
         return nama;
     }
