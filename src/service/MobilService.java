@@ -15,8 +15,8 @@ public class MobilService {
         String sql = "SELECT * FROM Mobil";
 
         try (Connection conn = SQLDatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 list.add(new Mobil(
@@ -29,8 +29,7 @@ public class MobilService {
                         rs.getInt("kapasitas"),
                         rs.getInt("tahun_pembuatan"),
                         rs.getString("status").equalsIgnoreCase("Tersedia"),
-                        rs.getInt("harga_sewa")
-                ));
+                        rs.getInt("harga_sewa")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -39,11 +38,12 @@ public class MobilService {
     }
 
     public boolean addMobil(Mobil m, int idCabang) {
-        String sql = "INSERT INTO Mobil (id_mobil, id_cabang, no_plat, brand, tipe, warna, kapasitas, tahun_pembuatan, status, harga_sewa) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Mobil (id_mobil, id_cabang, no_plat, brand, tipe, warna, kapasitas, tahun_pembuatan, status, harga_sewa) "
+                +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = SQLDatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             int nextId = getNextMobilId(conn);
             stmt.setInt(1, nextId);
             stmt.setInt(2, idCabang);
@@ -55,7 +55,7 @@ public class MobilService {
             stmt.setInt(8, m.getTahunPembuatan());
             stmt.setString(9, m.isAvailable() ? "Tersedia" : "Dipinjam");
             stmt.setInt(10, m.getTarifSewa());
-            
+
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -66,7 +66,7 @@ public class MobilService {
     public boolean updateMobilRate(String plat, int newRate) {
         String sql = "UPDATE Mobil SET harga_sewa = ? WHERE no_plat = ?";
         try (Connection conn = SQLDatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, newRate);
             stmt.setString(2, plat);
             return stmt.executeUpdate() > 0;
@@ -79,7 +79,7 @@ public class MobilService {
     public boolean updateMobilStatus(String plat, String status) {
         String sql = "UPDATE Mobil SET status = ? WHERE no_plat = ?";
         try (Connection conn = SQLDatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, status);
             stmt.setString(2, plat);
             return stmt.executeUpdate() > 0;
@@ -92,7 +92,7 @@ public class MobilService {
     public boolean deleteMobil(String plat) {
         String sql = "DELETE FROM Mobil WHERE no_plat = ?";
         try (Connection conn = SQLDatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, plat);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -104,7 +104,7 @@ public class MobilService {
     private int getNextMobilId(Connection conn) throws SQLException {
         String sql = "SELECT MAX(id_mobil) FROM Mobil";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                ResultSet rs = stmt.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt(1) + 1;
             }
