@@ -4,88 +4,67 @@ public class Mobil {
 
     private int idMobil;
     private int idCabang;
+
+    private String nama;
     private String brand;
     private String tipe;
     private String warna;
     private String plat;
+    private String status;
+
     private int kapasitas;
     private int tahunPembuatan;
-    private boolean available;
-    private int hargaSewa;
+
+    private double tarifSewa;
+    private double tarifDenda;
 
     public Mobil(
             int idMobil,
             int idCabang,
+            String nama,
             String brand,
             String tipe,
             String warna,
             String plat,
+            String status,
             int kapasitas,
             int tahunPembuatan,
-            boolean available,
-            int hargaSewa) {
+            double tarifSewa,
+            double tarifDenda
+    ) {
+
         this.idMobil = idMobil;
         this.idCabang = idCabang;
+        this.nama = nama;
         this.brand = brand;
         this.tipe = tipe;
         this.warna = warna;
         this.plat = plat;
+        this.status = status;
         this.kapasitas = kapasitas;
         this.tahunPembuatan = tahunPembuatan;
-        this.available = available;
-        this.hargaSewa = hargaSewa;
+        this.tarifSewa = tarifSewa;
+        this.tarifDenda = tarifDenda;
     }
 
-    public int getIdMobil() {
-        return idMobil;
+    public int getIdMobil() { return idMobil; }
+    public int getIdCabang() { return idCabang; }
+    public String getNama() { return nama; }
+    public String getBrand() { return brand; }
+    public String getTipe() { return tipe; }
+    public String getWarna() { return warna; }
+    public String getPlat() { return plat; }
+    public String getStatus() { return status; }
+    public int getKapasitas() { return kapasitas; }
+    public int getTahunPembuatan() { return tahunPembuatan; }
+    public double getTarifSewa() { return tarifSewa; }
+    public double getTarifDenda() { return tarifDenda; }
+
+    public void setTarifSewa(double tarifSewa) {
+        this.tarifSewa = tarifSewa;
     }
 
-    public int getIdCabang() {
-        return idCabang;
+    public void setStatus(String status) {
+        this.status = status;
     }
-
-    public String getNama() {
-        return brand + " " + tipe;
-    }
-
-    public String getBrand() {
-        return brand;
-    }
-
-    public String getTipe() {
-        return tipe;
-    }
-
-    public String getWarna() {
-        return warna;
-    }
-
-    public String getPlat() {
-        return plat;
-    }
-
-    public int getKapasitas() {
-        return kapasitas;
-    }
-
-    public int getTahunPembuatan() {
-        return tahunPembuatan;
-    }
-
-    public boolean isAvailable() {
-        return available;
-    }
-
-    public void setAvailable(boolean available) {
-        this.available = available;
-    }
-
-    public void setHargaSewa(int hargaSewa) {
-        this.hargaSewa = hargaSewa;
-    }
-
-    public int getTarifSewa() {
-        return this.hargaSewa;
-    }
-
 }

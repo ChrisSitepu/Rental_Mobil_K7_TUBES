@@ -1,47 +1,70 @@
-//  package menu.manager;
-
-// public class LaporanMenu {
-
-//     public void show() {
-
-//         System.out.println("\n========== LAPORAN RENTAL ==========");
-
-//         System.out.println("\n--- LAPORAN UMUM ---");
-
-//         System.out.println("Total Transaksi            : 25");
-//         System.out.println("Mobil Tersedia             : 10");
-//         System.out.println("Total Pendapatan           : Rp15.000.000");
-
-//         System.out.println("\n--- LAPORAN PENJUALAN ---");
-
-//         System.out.println("Rata-rata Pendapatan/Bulan : Rp5.000.000");
-//         System.out.println("Jumlah Transaksi/Bulan     : 8 transaksi");
-
-//         System.out.println("\n--- LAPORAN MOBIL ---");
-
-//         System.out.println("Mobil Paling Banyak Disewa : Toyota Avanza");
-
-//         System.out.println("\nMobil per Cabang:");
-//         System.out.println("- Bandung  : 5 mobil");
-//         System.out.println("- Jakarta  : 4 mobil");
-//         System.out.println("- Surabaya : 6 mobil");
-
-//         System.out.println("\n--- LAPORAN CABANG ---");
-
-//         System.out.println("Cabang Paling Ramai        : Bandung");
-
-//         System.out.println("\nJumlah Pegawai per Cabang:");
-//         System.out.println("- Bandung  : 3 pegawai");
-//         System.out.println("- Jakarta  : 2 pegawai");
-//         System.out.println("- Surabaya : 4 pegawai");
-
-//         System.out.println("\n====================================");
-//     }
-// }
 package menu.manager;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import config.SQLDatabaseConnection;
 import service.LaporanService;
 
 public class LaporanMenu {
+
+    private void mobilPerCabang() {
+
+        String sql = """
+            SELECT c.nama, COUNT(m.id_mobil) AS total
+            FROM Cabang c
+            LEFT JOIN Mobil m ON c.id_cabang = m.id_cabang
+            GROUP BY c.nama
+        """;
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
+
+            while (rs.next()) {
+                System.out.println(
+                    rs.getString("nama") + " : "
+                    + rs.getInt("total") + " mobil"
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void pegawaiPerCabang() {
+
+        String sql = """
+            SELECT c.nama, COUNT(p.id_pegawai) AS total
+            FROM Cabang c
+            LEFT JOIN Bertugas_Di b
+                ON c.id_cabang = b.id_cabang
+            LEFT JOIN Pegawai p
+                ON b.id_pegawai = p.id_pegawai
+            GROUP BY c.nama
+        """;
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
+
+            while (rs.next()) {
+                System.out.println(
+                    rs.getString("nama") + " : "
+                    + rs.getInt("total") + " pegawai"
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public void show() {
 
@@ -52,38 +75,44 @@ public class LaporanMenu {
         System.out.println("\n--- LAPORAN UMUM ---");
 
         System.out.println(
-                "Total Transaksi            : "
-                        + laporanService.getTotalTransaksi());
+            "Total Transaksi            : "
+            + laporanService.getTotalTransaksi());
 
         System.out.println(
-                "Mobil Tersedia             : "
-                        + laporanService.getMobilTersedia());
+            "Mobil Tersedia             : "
+            + laporanService.getMobilTersedia());
 
         System.out.println(
-                "Total Pendapatan           : Rp"
-                        + laporanService.getTotalPendapatan());
+            "Total Pendapatan           : Rp"
+            + laporanService.getTotalPendapatan());
 
         System.out.println("\n--- LAPORAN PENJUALAN ---");
 
         System.out.println(
-                "Pendapatan Bulan Ini       : Rp"
-                        + laporanService.getPendapatanBulanIni());
+            "Pendapatan Bulan Ini       : Rp"
+            + laporanService.getPendapatanBulanIni());
 
         System.out.println(
-                "Jumlah Transaksi Bulan Ini : "
-                        + laporanService.getJumlahTransaksiBulanIni());
+            "Jumlah Transaksi Bulan Ini : "
+            + laporanService.getJumlahTransaksiBulanIni());
 
         System.out.println("\n--- LAPORAN MOBIL ---");
 
         System.out.println(
-                "Mobil Paling Banyak Disewa : "
-                        + laporanService.getMobilPalingBanyakDisewa());
+            "Mobil Paling Banyak Disewa : "
+            + laporanService.getMobilPalingBanyakDisewa());
+
+        System.out.println("\nMobil per Cabang:");
+        mobilPerCabang();
 
         System.out.println("\n--- LAPORAN CABANG ---");
 
         System.out.println(
-                "Cabang Paling Ramai        : "
-                        + laporanService.getCabangPalingRamai());
+            "Cabang Paling Ramai        : "
+            + laporanService.getCabangPalingRamai());
+
+        System.out.println("\nJumlah Pegawai per Cabang:");
+        pegawaiPerCabang();
 
         System.out.println("\n====================================");
     }

@@ -1,20 +1,18 @@
 package menu.manager;
 
-import model.Cabang;
-import service.CabangService;
-
-import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import config.SQLDatabaseConnection;
 
 public class KelolaCabangMenu {
 
-    private CabangService cabangService = new CabangService();
     private Scanner sc = new Scanner(System.in);
-
-    public KelolaCabangMenu() {
-    }
 
     public void show() {
 
@@ -22,10 +20,7 @@ public class KelolaCabangMenu {
 
             System.out.println("\n=== KELOLA CABANG ===");
 
-            ArrayList<Cabang> cabangList = cabangService.getAllCabang();
-            for (int i = 0; i < cabangList.size(); i++) {
-                System.out.println((i + 1) + ". " + cabangList.get(i).getNama() + " (" + cabangList.get(i).getAlamat() + ")");
-            }
+            tampilCabang();
 
             System.out.println("\nMenu:");
             System.out.println("1. Tambah Cabang");
@@ -33,14 +28,7 @@ public class KelolaCabangMenu {
             System.out.println("3. Kembali");
 
             System.out.print("Pilih: ");
-            int pilih = 0;
-            try {
-                pilih = sc.nextInt();
-            } catch (Exception e) {
-                sc.nextLine();
-                System.out.println("Input harus angka!");
-                continue;
-            }
+            int pilih = sc.nextInt();
             sc.nextLine();
 
             switch (pilih) {
@@ -50,7 +38,7 @@ public class KelolaCabangMenu {
                     break;
 
                 case 2:
-                    editCabang(cabangList);
+                    editCabang();
                     break;
 
                 case 3:
@@ -62,145 +50,257 @@ public class KelolaCabangMenu {
         }
     }
 
-    private void tambahCabang() {
+    private List<Integer> tampilCabang() {
 
-        System.out.println("\n=== TAMBAH CABANG ===");
-        System.out.print("Masukkan nama cabang: ");
-        String nama = sc.nextLine();
-        
-        LocalTime jamOperasional = null;
-        while (jamOperasional == null) {
-            System.out.print("Masukkan jam operasional (HH:mm): ");
-            String jamStr = sc.nextLine();
-            try {
-                jamOperasional = LocalTime.parse(jamStr);
-            } catch (DateTimeParseException e) {
-                System.out.println("Format jam tidak valid! Gunakan HH:mm (contoh: 08:00)");
+        String sql = "SELECT id_cabang, nama FROM Cabang ORDER BY id_cabang";
+
+        List<Integer> idList = new ArrayList<>();
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
+
+            int no = 1;
+
+            while (rs.next()) {
+
+                int id = rs.getInt("id_cabang");
+                String nama = rs.getString("nama");
+
+                idList.add(id);
+
+                System.out.println(no + ". " + nama);
+
+                no++;
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
-        System.out.print("Masukkan email: ");
-        String email = sc.nextLine();
+        return idList;
+    }
 
-        System.out.print("Masukkan no telepon: ");
-        String noTelp = sc.nextLine();
+    private void tambahCabang() {
 
-        System.out.print("Masukkan alamat: ");
-        String alamat = sc.nextLine();
+        try {
 
-        int id = cabangService.getNextId();
-        Cabang newCabang = new Cabang(id, nama, jamOperasional, email, noTelp, alamat);
+            System.out.println("Ketik 'cancel' kapan saja untuk batal.\n");
 
-        if (cabangService.addCabang(newCabang)) {
-            System.out.println("Cabang berhasil ditambahkan!");
-        } else {
-            System.out.println("Gagal menambahkan cabang!");
+            String nama = input("Nama Cabang: ");
+            String jam = input("Jam Operasional (HH:mm:ss): ");
+            String email = input("Email: ");
+            String telepon = input("No Telepon: ");
+            String alamat = input("Alamat: ");
+
+            String sql =
+            "INSERT INTO Cabang(nama, jam_operasional, email, no_telepon, alamat) " +
+            "VALUES (?, ?, ?, ?, ?)";
+
+            try (
+                Connection conn = SQLDatabaseConnection.getConnection();
+                PreparedStatement ps =
+                    conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+            ) {
+
+                ps.setString(1, nama);
+                ps.setString(2, jam);
+                ps.setString(3, email);
+                ps.setString(4, telepon);
+                ps.setString(5, alamat);
+
+                ps.executeUpdate();
+
+                ResultSet rs = ps.getGeneratedKeys();
+
+                if (rs.next()) {
+                    System.out.println("Cabang berhasil ditambahkan dengan ID " + rs.getInt(1));
+                }
+            }
+
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("CANCELLED")) {
+                System.out.println("Penambahan cabang dibatalkan.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
-    private void editCabang(ArrayList<Cabang> cabangList) {
+    private void editCabang() {
 
-        if (cabangList.isEmpty()) {
-            System.out.println("Belum ada cabang.");
-            return;
-        }
-
-        System.out.println("\n=== EDIT CABANG ===");
-
-        for (int i = 0; i < cabangList.size(); i++) {
-            System.out.println((i + 1) + ". " + cabangList.get(i).getNama());
-        }
-
-        System.out.print("Pilih cabang: ");
-        int index = 0;
         try {
-            index = sc.nextInt() - 1;
-        } catch (Exception e) {
+
+            List<Integer> idList = tampilCabang();
+
+            System.out.print("Pilih Cabang (nomor): ");
+            int index = sc.nextInt();
             sc.nextLine();
-            System.out.println("Input harus angka!");
-            return;
-        }
-        sc.nextLine();
 
-        if (index < 0 || index >= cabangList.size()) {
-            System.out.println("Cabang tidak ditemukan!");
-            return;
-        }
-
-        Cabang selectedCabang = cabangList.get(index);
-
-        System.out.println("\nDetail Cabang: " + selectedCabang.getNama());
-        System.out.println("1. Ubah Data");
-        System.out.println("2. Hapus Cabang");
-        System.out.println("3. Kembali");
-
-        System.out.print("Pilih aksi: ");
-        int aksi = 0;
-        try {
-            aksi = sc.nextInt();
-        } catch (Exception e) {
-            sc.nextLine();
-            System.out.println("Input harus angka!");
-            return;
-        }
-        sc.nextLine();
-
-        switch (aksi) {
-
-            case 1:
-                System.out.print("Nama baru [" + selectedCabang.getNama() + "]: ");
-                String nama = sc.nextLine();
-                if (nama.isEmpty()) nama = selectedCabang.getNama();
-
-                LocalTime jamOperasional = selectedCabang.getJamOperasional();
-                System.out.print("Jam operasional baru [" + jamOperasional + "] (HH:mm): ");
-                String jamStr = sc.nextLine();
-                if (!jamStr.isEmpty()) {
-                    try {
-                        jamOperasional = LocalTime.parse(jamStr);
-                    } catch (DateTimeParseException e) {
-                        System.out.println("Format jam tidak valid! Menggunakan nilai lama.");
-                    }
-                }
-
-                System.out.print("Email baru [" + selectedCabang.getEmail() + "]: ");
-                String email = sc.nextLine();
-                if (email.isEmpty()) email = selectedCabang.getEmail();
-
-                System.out.print("No telepon baru [" + selectedCabang.getNoTelepon() + "]: ");
-                String noTelp = sc.nextLine();
-                if (noTelp.isEmpty()) noTelp = selectedCabang.getNoTelepon();
-
-                System.out.print("Alamat baru [" + selectedCabang.getAlamat() + "]: ");
-                String alamat = sc.nextLine();
-                if (alamat.isEmpty()) alamat = selectedCabang.getAlamat();
-
-                Cabang updatedCabang = new Cabang(selectedCabang.getIdCabang(), nama, jamOperasional, email, noTelp, alamat);
-
-                if (cabangService.updateCabang(updatedCabang)) {
-                    System.out.println("Cabang berhasil diubah!");
-                } else {
-                    System.out.println("Gagal mengubah cabang!");
-                }
-                break;
-
-            case 2:
-                System.out.print("Apakah Anda yakin ingin menghapus cabang ini? (y/n): ");
-                String confirm = sc.nextLine();
-                if (confirm.equalsIgnoreCase("y")) {
-                    if (cabangService.deleteCabang(selectedCabang.getIdCabang())) {
-                        System.out.println("Cabang berhasil dihapus!");
-                    } else {
-                        System.out.println("Gagal menghapus cabang!");
-                    }
-                }
-                break;
-
-            case 3:
-                break;
-
-            default:
+            if (index < 1 || index > idList.size()) {
                 System.out.println("Pilihan tidak valid!");
+                return;
+            }
+
+            int id = idList.get(index - 1);
+
+            tampilDetailCabang(id);
+
+            System.out.println("\nField yang ingin diubah:");
+            System.out.println("1. Nama");
+            System.out.println("2. Jam Operasional");
+            System.out.println("3. Email");
+            System.out.println("4. No Telepon");
+            System.out.println("5. Alamat");
+            System.out.println("6. Hapus Cabang");
+            System.out.print("Pilih: ");
+
+            int pilihan = sc.nextInt();
+            sc.nextLine();
+
+            String column = null;
+            String newValue = null;
+
+            switch (pilihan) {
+
+                case 1 -> {
+                    column = "nama";
+                    newValue = input("Nama baru: ");
+                }
+                case 2 -> {
+                    column = "jam_operasional";
+                    newValue = input("Jam baru: ");
+                }
+                case 3 -> {
+                    column = "email";
+                    newValue = input("Email baru: ");
+                }
+                case 4 -> {
+                    column = "no_telepon";
+                    newValue = input("No telepon baru: ");
+                }
+                case 5 -> {
+                    column = "alamat";
+                    newValue = input("Alamat baru: ");
+                }
+                case 6 -> {
+                    deleteCabang(id);
+                    return;
+                }
+                default -> {
+                    System.out.println("Pilihan tidak valid!");
+                    return;
+                }
+            }
+
+            if (newValue == null) {
+                System.out.println("Field dilewati (tidak diubah).");
+                return;
+            }
+
+            updateCabangDynamic(id, column, newValue);
+
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("CANCEL")) {
+                System.out.println("Edit dibatalkan sepenuhnya.");
+            }
         }
+    }
+
+    private void tampilDetailCabang(int id) {
+
+        String sql = "SELECT * FROM Cabang WHERE id_cabang = ?";
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                System.out.println("\n--- DETAIL CABANG ---");
+                System.out.println("Nama: " + rs.getString("nama"));
+                System.out.println("Jam Operasional: " + rs.getString("jam_operasional"));
+                System.out.println("Email: " + rs.getString("email"));
+                System.out.println("Telepon: " + rs.getString("no_telepon"));
+                System.out.println("Alamat: " + rs.getString("alamat"));
+            } else {
+                System.out.println("Cabang tidak ditemukan!");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateCabangDynamic(int id, String column, String value) {
+
+        String sql = "UPDATE Cabang SET " + column + " = ? WHERE id_cabang = ?";
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, value);
+            ps.setInt(2, id);
+
+            int rows = ps.executeUpdate();
+
+            if (rows > 0) {
+                System.out.println("Cabang berhasil diupdate!");
+            } else {
+                System.out.println("Cabang tidak ditemukan!");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deleteCabang(int id) {
+
+        String sql = "DELETE FROM Cabang WHERE id_cabang = ?";
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, id);
+
+            int rows = ps.executeUpdate();
+
+            if (rows > 0) {
+                System.out.println("Cabang berhasil dihapus!");
+            } else {
+                System.out.println("Cabang tidak ditemukan!");
+            }
+
+        } catch (SQLException e) {
+            System.out.println(
+                "Cabang tidak dapat dihapus karena masih digunakan data lain."
+            );
+        }
+    }
+    
+    private String input(String prompt) {
+
+        System.out.print(prompt);
+        String value = sc.nextLine();
+
+        if (value.equalsIgnoreCase("cancel")) {
+            throw new RuntimeException("CANCEL");
+        }
+
+        if (value.trim().isEmpty()) {
+            return null; // skip update
+        }
+
+        return value;
     }
 }

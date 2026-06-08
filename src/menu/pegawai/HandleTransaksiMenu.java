@@ -1,191 +1,329 @@
+// // package menu.pegawai;
+
+// // import java.util.ArrayList;
+// // import java.util.Scanner;
+
+// // import model.Transaksi;
+
+// // public class HandleTransaksiMenu {
+
+// //     private Scanner sc = new Scanner(System.in);
+
+// // //     public void show(){
+
+// // //         ArrayList<Transaksi> list =
+// // //                 new ArrayList<>();
+
+// // //         list.add(
+// // //         new Transaksi(
+// // //                 "Toyota Avanza",
+// // //                 "SUV",
+// // //                 300000,
+// // //                 "21 Mei 2026",
+// // //                 "Transfer Bank",
+// // //                 "DIPROSES",
+// // //                 "kei@gmail.com",
+// // //                 "Body depan terdapat goresan kecil di bumper kiri.",
+// // //                 "https://imgur.com/avanza-condition"
+// // //         )
+// // //     );
+
+// // //     list.add(
+// // //             new Transaksi(
+// // //                     "Honda Civic",
+// // //                     "Sedan",
+// // //                     500000,
+// // //                     "20 Mei 2026",
+// // //                     "QRIS",
+// // //                     "MENUNGGU VERIFIKASI",
+// // //                     "sinta@gmail.com",
+// // //                     "Kondisi bagus, interior bersih.",
+// // //                     "https://imgur.com/civic-condition"
+// // //             )
+// // //     );
+
+// // //         while(true){
+
+// // //             System.out.println(
+// // //                     "\n=== TRANSAKSI YANG DIHANDLE ==="
+// // //             );
+
+// // //             for(int i = 0; i < list.size(); i++){
+
+// // //                 Transaksi t = list.get(i);
+
+// // //                 System.out.println(
+// // //                         (i + 1)
+// // //                         + ". "
+// // //                         + t.getNamaMobil()
+// // //                         + " - "
+// // //                         + t.getStatus()
+// // //                 );
+// // //             }
+
+// // //             System.out.println(
+// // //                     "0. Kembali"
+// // //             );
+
+// // //             System.out.print(
+// // //                     "Pilih transaksi: "
+// // //             );
+
+// // //             int pilih =
+// // //                     Integer.parseInt(sc.nextLine());
+
+// // //             if(pilih == 0){
+// // //                 return;
+// // //             }
+
+// // //             if(pilih < 1 || pilih > list.size()){
+
+// // //                 System.out.println(
+// // //                         "Pilihan tidak valid!"
+// // //                 );
+
+// // //                 continue;
+// // //             }
+
+// // //             Transaksi t =
+// // //                     list.get(pilih - 1);
+
+// // //             showDetail(t);
+// // //         }
+// // //     }
+
+// // //     private void showDetail(Transaksi t){
+
+// // //         System.out.println(
+// // //                 "\n===== DETAIL TRANSAKSI ====="
+// // //         );
+
+// // //         System.out.println(
+// // //                 "Email Member      : "
+// // //                 + t.getEmailMember()
+// // //         );
+
+// // //         System.out.println(
+// // //                 "Mobil             : "
+// // //                 + t.getNamaMobil()
+// // //         );
+
+// // //         System.out.println(
+// // //                 "Tipe Mobil        : "
+// // //                 + t.getTipeMobil()
+// // //         );
+
+// // //         System.out.println(
+// // //                 "Harga             : Rp"
+// // //                 + t.getHarga()
+// // //         );
+
+// // //         System.out.println(
+// // //                 "Tanggal Sewa      : "
+// // //                 + t.getTanggalSewa()
+// // //         );
+
+// // //         System.out.println(
+// // //                 "Metode Pembayaran : "
+// // //                 + t.getMetodePembayaran()
+// // //         );
+
+// // //         System.out.println(
+// // //                 "Status            : "
+// // //                 + t.getStatus()
+// // //         );
+
+// // //         System.out.println(
+// // //         "\n=== KONDISI MOBIL SEBELUM DIPINJAM ==="
+// // //     );
+
+// // //         System.out.println(
+// // //                 "Deskripsi : "
+// // //                 + t.getCatatanKondisi()
+// // //         );
+
+// // //         System.out.println(
+// // //                 "Foto URL  : "
+// // //                 + t.getFotoKondisiUrl()
+// // //         );
+
+// // //         System.out.println(
+// // //                 "\nTekan enter untuk kembali..."
+// // //         );
+
+// // //         sc.nextLine();
+
+        
+// // //     }
+// // }
 // package menu.pegawai;
 
 // import java.util.ArrayList;
 // import java.util.Scanner;
 
 // import model.Transaksi;
+// import service.TransaksiService;
 
 // public class HandleTransaksiMenu {
 
 //     private Scanner sc = new Scanner(System.in);
+//     private TransaksiService transaksiService = new TransaksiService();
 
-// //     public void show(){
+//     public void show() {
 
-// //         ArrayList<Transaksi> list =
-// //                 new ArrayList<>();
+//         ArrayList<Transaksi> list =
+//                 transaksiService.getAllActivePeminjaman();
 
-// //         list.add(
-// //         new Transaksi(
-// //                 "Toyota Avanza",
-// //                 "SUV",
-// //                 300000,
-// //                 "21 Mei 2026",
-// //                 "Transfer Bank",
-// //                 "DIPROSES",
-// //                 "kei@gmail.com",
-// //                 "Body depan terdapat goresan kecil di bumper kiri.",
-// //                 "https://imgur.com/avanza-condition"
-// //         )
-// //     );
+//         if (list.isEmpty()) {
+//             System.out.println("\nBelum ada transaksi aktif.");
+//             return;
+//         }
 
-// //     list.add(
-// //             new Transaksi(
-// //                     "Honda Civic",
-// //                     "Sedan",
-// //                     500000,
-// //                     "20 Mei 2026",
-// //                     "QRIS",
-// //                     "MENUNGGU VERIFIKASI",
-// //                     "sinta@gmail.com",
-// //                     "Kondisi bagus, interior bersih.",
-// //                     "https://imgur.com/civic-condition"
-// //             )
-// //     );
+//         while (true) {
 
-// //         while(true){
+//             System.out.println(
+//                     "\n=== TRANSAKSI YANG DIHANDLE ==="
+//             );
 
-// //             System.out.println(
-// //                     "\n=== TRANSAKSI YANG DIHANDLE ==="
-// //             );
+//             for (int i = 0; i < list.size(); i++) {
 
-// //             for(int i = 0; i < list.size(); i++){
+//                 Transaksi t = list.get(i);
 
-// //                 Transaksi t = list.get(i);
+//                 System.out.println(
+//                         (i + 1)
+//                         + ". "
+//                         + t.getNamaMobil()
+//                         + " - "
+//                         + t.getNamaMember()
+//                         + " - "
+//                         + t.getStatus()
+//                 );
+//             }
 
-// //                 System.out.println(
-// //                         (i + 1)
-// //                         + ". "
-// //                         + t.getNamaMobil()
-// //                         + " - "
-// //                         + t.getStatus()
-// //                 );
-// //             }
+//             System.out.println("0. Kembali");
 
-// //             System.out.println(
-// //                     "0. Kembali"
-// //             );
+//             System.out.print("Pilih transaksi: ");
 
-// //             System.out.print(
-// //                     "Pilih transaksi: "
-// //             );
+//             int pilih = Integer.parseInt(sc.nextLine());
 
-// //             int pilih =
-// //                     Integer.parseInt(sc.nextLine());
+//             if (pilih == 0) {
+//                 return;
+//             }
 
-// //             if(pilih == 0){
-// //                 return;
-// //             }
+//             if (pilih < 1 || pilih > list.size()) {
+//                 System.out.println("Pilihan tidak valid!");
+//                 continue;
+//             }
 
-// //             if(pilih < 1 || pilih > list.size()){
+//             showDetail(list.get(pilih - 1));
+//         }
+//     }
 
-// //                 System.out.println(
-// //                         "Pilihan tidak valid!"
-// //                 );
+//     private void showDetail(Transaksi t) {
 
-// //                 continue;
-// //             }
+//         System.out.println(
+//                 "\n===== DETAIL TRANSAKSI ====="
+//         );
 
-// //             Transaksi t =
-// //                     list.get(pilih - 1);
+//         System.out.println(
+//                 "Nama Member      : "
+//                 + t.getNamaMember()
+//         );
 
-// //             showDetail(t);
-// //         }
-// //     }
+//         System.out.println(
+//                 "Mobil            : "
+//                 + t.getNamaMobil()
+//         );
 
-// //     private void showDetail(Transaksi t){
+//         System.out.println(
+//                 "Plat Mobil       : "
+//                 + t.getPlatMobil()
+//         );
 
-// //         System.out.println(
-// //                 "\n===== DETAIL TRANSAKSI ====="
-// //         );
+//         System.out.println(
+//                 "Biaya Sewa       : Rp"
+//                 + t.getBiayaSewa()
+//         );
 
-// //         System.out.println(
-// //                 "Email Member      : "
-// //                 + t.getEmailMember()
-// //         );
+//         System.out.println(
+//                 "Total Hari Sewa  : "
+//                 + t.getTotalHariSewa()
+//         );
 
-// //         System.out.println(
-// //                 "Mobil             : "
-// //                 + t.getNamaMobil()
-// //         );
+//         System.out.println(
+//                 "Tanggal Pinjam   : "
+//                 + t.getWaktuPinjam()
+//         );
 
-// //         System.out.println(
-// //                 "Tipe Mobil        : "
-// //                 + t.getTipeMobil()
-// //         );
+//         System.out.println(
+//                 "Rencana Kembali  : "
+//                 + t.getWaktuRencanaPengembalian()
+//         );
 
-// //         System.out.println(
-// //                 "Harga             : Rp"
-// //                 + t.getHarga()
-// //         );
+//         System.out.println(
+//                 "Status           : "
+//                 + t.getStatus()
+//         );
 
-// //         System.out.println(
-// //                 "Tanggal Sewa      : "
-// //                 + t.getTanggalSewa()
-// //         );
+//         System.out.println(
+//                 "\nTekan enter untuk kembali..."
+//         );
 
-// //         System.out.println(
-// //                 "Metode Pembayaran : "
-// //                 + t.getMetodePembayaran()
-// //         );
-
-// //         System.out.println(
-// //                 "Status            : "
-// //                 + t.getStatus()
-// //         );
-
-// //         System.out.println(
-// //         "\n=== KONDISI MOBIL SEBELUM DIPINJAM ==="
-// //     );
-
-// //         System.out.println(
-// //                 "Deskripsi : "
-// //                 + t.getCatatanKondisi()
-// //         );
-
-// //         System.out.println(
-// //                 "Foto URL  : "
-// //                 + t.getFotoKondisiUrl()
-// //         );
-
-// //         System.out.println(
-// //                 "\nTekan enter untuk kembali..."
-// //         );
-
-// //         sc.nextLine();
-
-        
-// //     }
+//         sc.nextLine();
+//     }
 // }
+
 package menu.pegawai;
 
 import java.util.ArrayList;
 import java.util.Scanner;
 
 import model.Transaksi;
-import service.TransaksiService;
 
 public class HandleTransaksiMenu {
 
     private Scanner sc = new Scanner(System.in);
-    private TransaksiService transaksiService = new TransaksiService();
 
-    public void show() {
+    public void show(){
 
         ArrayList<Transaksi> list =
-                transaksiService.getAllActivePeminjaman();
+                new ArrayList<>();
 
-        if (list.isEmpty()) {
-            System.out.println("\nBelum ada transaksi aktif.");
-            return;
-        }
+        list.add(
+        new Transaksi(
+                "Toyota Avanza",
+                "SUV",
+                300000,
+                "21 Mei 2026",
+                "Transfer Bank",
+                "DIPROSES",
+                "kei@gmail.com",
+                "Body depan terdapat goresan kecil di bumper kiri.",
+                "https://imgur.com/avanza-condition"
+        )
+    );
 
-        while (true) {
+    list.add(
+            new Transaksi(
+                    "Honda Civic",
+                    "Sedan",
+                    500000,
+                    "20 Mei 2026",
+                    "QRIS",
+                    "MENUNGGU VERIFIKASI",
+                    "sinta@gmail.com",
+                    "Kondisi bagus, interior bersih.",
+                    "https://imgur.com/civic-condition"
+            )
+    );
+
+        while(true){
 
             System.out.println(
                     "\n=== TRANSAKSI YANG DIHANDLE ==="
             );
 
-            for (int i = 0; i < list.size(); i++) {
+            for(int i = 0; i < list.size(); i++){
 
                 Transaksi t = list.get(i);
 
@@ -194,75 +332,94 @@ public class HandleTransaksiMenu {
                         + ". "
                         + t.getNamaMobil()
                         + " - "
-                        + t.getNamaMember()
-                        + " - "
                         + t.getStatus()
                 );
             }
 
-            System.out.println("0. Kembali");
+            System.out.println(
+                    "0. Kembali"
+            );
 
-            System.out.print("Pilih transaksi: ");
+            System.out.print(
+                    "Pilih transaksi: "
+            );
 
-            int pilih = Integer.parseInt(sc.nextLine());
+            int pilih =
+                    Integer.parseInt(sc.nextLine());
 
-            if (pilih == 0) {
+            if(pilih == 0){
                 return;
             }
 
-            if (pilih < 1 || pilih > list.size()) {
-                System.out.println("Pilihan tidak valid!");
+            if(pilih < 1 || pilih > list.size()){
+
+                System.out.println(
+                        "Pilihan tidak valid!"
+                );
+
                 continue;
             }
 
-            showDetail(list.get(pilih - 1));
+            Transaksi t =
+                    list.get(pilih - 1);
+
+            showDetail(t);
         }
     }
 
-    private void showDetail(Transaksi t) {
+    private void showDetail(Transaksi t){
 
         System.out.println(
                 "\n===== DETAIL TRANSAKSI ====="
         );
 
         System.out.println(
-                "Nama Member      : "
-                + t.getNamaMember()
+                "Email Member      : "
+                + t.getEmailMember()
         );
 
         System.out.println(
-                "Mobil            : "
+                "Mobil             : "
                 + t.getNamaMobil()
         );
 
         System.out.println(
-                "Plat Mobil       : "
-                + t.getPlatMobil()
+                "Tipe Mobil        : "
+                + t.getTipeMobil()
         );
 
         System.out.println(
-                "Biaya Sewa       : Rp"
-                + t.getBiayaSewa()
+                "Harga             : Rp"
+                + t.getHarga()
         );
 
         System.out.println(
-                "Total Hari Sewa  : "
-                + t.getTotalHariSewa()
+                "Tanggal Sewa      : "
+                + t.getTanggalSewa()
         );
 
         System.out.println(
-                "Tanggal Pinjam   : "
-                + t.getWaktuPinjam()
+                "Metode Pembayaran : "
+                + t.getMetodePembayaran()
         );
 
         System.out.println(
-                "Rencana Kembali  : "
-                + t.getWaktuRencanaPengembalian()
-        );
-
-        System.out.println(
-                "Status           : "
+                "Status            : "
                 + t.getStatus()
+        );
+
+        System.out.println(
+        "\n=== KONDISI MOBIL SEBELUM DIPINJAM ==="
+    );
+
+        System.out.println(
+                "Deskripsi : "
+                + t.getCatatanKondisi()
+        );
+
+        System.out.println(
+                "Foto URL  : "
+                + t.getFotoKondisiUrl()
         );
 
         System.out.println(
@@ -270,5 +427,7 @@ public class HandleTransaksiMenu {
         );
 
         sc.nextLine();
+
+        
     }
 }
