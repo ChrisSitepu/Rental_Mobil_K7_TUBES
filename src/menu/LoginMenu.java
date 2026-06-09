@@ -1,9 +1,8 @@
 package menu;
 
 import java.util.Scanner;
-
-import menu.member.MemberMenu;
 import menu.manager.ManagerMenu;
+import menu.member.MemberMenu;
 import menu.pegawai.PegawaiMenu;
 import model.*;
 import service.AuthService;

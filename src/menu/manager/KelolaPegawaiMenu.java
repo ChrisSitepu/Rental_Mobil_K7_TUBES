@@ -1,12 +1,11 @@
 package menu.manager;
 
+import config.SQLDatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Scanner;
-
-import config.SQLDatabaseConnection;
 import model.Role;
 import model.User;
 
@@ -68,7 +67,7 @@ public class KelolaPegawaiMenu {
 
             for (int i = 0; i < pegawaiList.size(); i++) {
                 User p = pegawaiList.get(i);
-                System.out.println((i + 1) + ". " + p.getNama() + " (Cabang ID: " + p.getIdCabang() + ")");
+                System.out.println((i + 1) + ". " + p.getNama() + " (Cabang ID: " + p.getCabang() + ")");
             }
 
             System.out.println("99. Tambah Pegawai");
@@ -108,7 +107,7 @@ public class KelolaPegawaiMenu {
             System.out.println("Email     : " + p.getEmail());
             System.out.println("Alamat    : " + p.getAlamat());
             System.out.println("No HP     : " + p.getNomorTelepon());
-            System.out.println("ID Cabang : " + p.getIdCabang());
+            System.out.println("ID Cabang : " + p.getCabang());
 
             System.out.println("\n1. Edit Cabang");
             System.out.println("2. Hapus Pegawai");
@@ -158,20 +157,17 @@ public class KelolaPegawaiMenu {
     }
 
     private void hapusPegawai(User p) {
-        String sqlPegawai = "DELETE FROM Pegawai WHERE id_pegawai = ?";
-        String sqlUser = "DELETE FROM Users WHERE id_user = ?";
+        String sqlPegawai = "UPDATE Pegawai SET status = 'Nonaktif' WHERE id_pegawai = ?";
         try (Connection conn = SQLDatabaseConnection.getConnection()) {
-            conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(sqlPegawai)) {
                 ps.setInt(1, p.getIdPegawai());
-                ps.executeUpdate();
+                int rows = ps.executeUpdate();
+                if (rows > 0) {
+                    System.out.println("Pegawai berhasil dinonaktifkan!");
+                } else {
+                    System.out.println("Pegawai tidak ditemukan!");
+                }
             }
-            try (PreparedStatement ps = conn.prepareStatement(sqlUser)) {
-                ps.setInt(1, p.getIdUser());
-                ps.executeUpdate();
-            }
-            conn.commit();
-            System.out.println("Pegawai berhasil dihapus!");
         } catch (Exception e) {
             e.printStackTrace();
         }

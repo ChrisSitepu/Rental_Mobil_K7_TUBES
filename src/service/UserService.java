@@ -1,16 +1,15 @@
 package service;
 
 import config.SQLDatabaseConnection;
-import model.Role;
-import model.User;
-import model.Member;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import model.Member;
+import model.Role;
+import model.User;
 
 public class UserService {
 
@@ -231,14 +230,38 @@ public class UserService {
     }
 
     public boolean deleteUserByEmail(String email) {
-        String sql = "DELETE FROM Users WHERE email = ?";
+        String findUser = "SELECT id_user FROM Users WHERE email = ?";
+        String updateMember = "UPDATE Member SET status = 'Nonaktif' WHERE id_user = ?";
+        String updatePegawai = "UPDATE Pegawai SET status = 'Nonaktif' WHERE id_user = ?";
 
-        try (Connection conn = SQLDatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+        Connection conn = null;
+        try {
+            conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement psFind = conn.prepareStatement(findUser);
+            psFind.setString(1, email);
+            ResultSet rs = psFind.executeQuery();
 
-            stmt.setString(1, email);
+            if (!rs.next()) {
+                return false;
+            }
 
-            return stmt.executeUpdate() > 0;
+            int idUser = rs.getInt("id_user");
+
+            conn.setAutoCommit(false);
+            boolean updated = false;
+
+            try (PreparedStatement psMem = conn.prepareStatement(updateMember)) {
+                psMem.setInt(1, idUser);
+                if (psMem.executeUpdate() > 0) updated = true;
+            }
+
+            try (PreparedStatement psPeg = conn.prepareStatement(updatePegawai)) {
+                psPeg.setInt(1, idUser);
+                if (psPeg.executeUpdate() > 0) updated = true;
+            }
+
+            conn.commit();
+            return updated;
 
         } catch (SQLException e) {
             System.out.println("Gagal menghapus: pastikan data member/pegawai terkait sudah dihapus.");

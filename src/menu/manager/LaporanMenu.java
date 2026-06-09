@@ -1,10 +1,9 @@
 package menu.manager;
 
+import config.SQLDatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
-import config.SQLDatabaseConnection;
 import service.LaporanService;
 
 public class LaporanMenu {

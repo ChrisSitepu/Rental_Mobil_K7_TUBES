@@ -1,11 +1,10 @@
 package service;
 
+import config.SQLDatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-
-import config.SQLDatabaseConnection;
 import model.Mobil;
 
 public class MobilService {
@@ -139,6 +138,22 @@ public class MobilService {
 
             return ps.executeUpdate() > 0;
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean deleteMobil(int idMobil) {
+        String sql = "UPDATE Mobil SET status = 'Tidak Tersedia' WHERE id_mobil = ?";
+
+        try (
+            Connection conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+            ps.setInt(1, idMobil);
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
         }

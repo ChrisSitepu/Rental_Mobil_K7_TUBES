@@ -1,10 +1,9 @@
 package service;
 
+import config.SQLDatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
-import config.SQLDatabaseConnection;
 import model.*;
 
 public class AuthService {
@@ -27,6 +26,9 @@ public class AuthService {
                 p.id_pegawai,
                 p.id_cabang,
                 j.nama_jabatan,
+                m.status AS member_status,
+                p.status AS pegawai_status,
+                j.nama_jabatan,
                 CASE
                     WHEN m.id_member IS NOT NULL THEN 'MEMBER'
                     WHEN j.nama_jabatan = 'Manager' THEN 'MANAGER'
@@ -36,6 +38,7 @@ public class AuthService {
             FROM Users u
             LEFT JOIN Member m ON u.id_user = m.id_user
             LEFT JOIN Pegawai p ON u.id_user = p.id_user
+            LEFT JOIN Jabatan j ON p.id_jabatan = j.id_jabatan
             WHERE u.email = ?
             """;
 
@@ -56,6 +59,19 @@ public class AuthService {
 
             if (!dbPassword.equals(password)) {
                 return new AuthResponse(AuthStatus.WRONG_PASSWORD, null);
+            }
+
+            // check account status before allowing login
+            String memberStatus = null;
+            try { memberStatus = rs.getString("member_status"); } catch (Exception ignored) {}
+            String pegawaiStatus = null;
+            try { pegawaiStatus = rs.getString("pegawai_status"); } catch (Exception ignored) {}
+
+            if (memberStatus != null && !memberStatus.equalsIgnoreCase("Aktif")) {
+                return new AuthResponse(AuthStatus.ACCOUNT_NOT_FOUND, null);
+            }
+            if (pegawaiStatus != null && !pegawaiStatus.equalsIgnoreCase("Aktif")) {
+                return new AuthResponse(AuthStatus.ACCOUNT_NOT_FOUND, null);
             }
 
             Role role = Role.valueOf(rs.getString("role"));
@@ -110,8 +126,8 @@ public class AuthService {
         String insertUser =
             """
             INSERT INTO Users
-            (nama,email,no_telp,alamat,password)
-            VALUES (?,?,?,?,?)
+            (nama,email,no_telp,alamat,password,role)
+            VALUES (?,?,?,?,?,'MEMBER')
             """;
 
         String insertMember =

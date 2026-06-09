@@ -1,7 +1,6 @@
 package menu.member;
 
 import java.util.Scanner;
-
 import model.User;
 
 public class MemberMenu {

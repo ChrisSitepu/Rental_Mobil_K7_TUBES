@@ -2,7 +2,6 @@ package menu.member;
 
 import java.util.ArrayList;
 import java.util.Scanner;
-
 import model.Mobil;
 import model.User;
 import service.MobilService;

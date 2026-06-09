@@ -1,7 +1,6 @@
 package menu.manager;
 
 import java.util.Scanner;
-
 import model.User;
 
 public class ManagerMenu {
@@ -41,19 +40,15 @@ public class ManagerMenu {
             );
 
             System.out.println(
-                    "5. Kelola Mobil"
+                    "5. Akses Laporan"
             );
 
             System.out.println(
-                    "6. Akses Laporan"
+                    "6. Profil Manager"
             );
 
             System.out.println(
-                    "7. Profil Manager"
-            );
-
-            System.out.println(
-                    "8. Logout"
+                    "7. Logout"
             );
 
             System.out.print("Pilih: ");
@@ -80,20 +75,15 @@ public class ManagerMenu {
                     break;
 
                 case 5:
-                    System.out.println("Fitur Kelola Tarif diakses melalui Kelola Data Mobil.");
-                    new KelolaMobilMenu().show();
-                    break;
-
-                case 6:
                     new LaporanMenu().show();
                     break;
 
-                case 7:
+                case 6:
                     new ProfileManagerMenu(user)
                             .show();
                     break;
 
-                case 8:
+                case 7:
                     running = false;
                     break;
 
