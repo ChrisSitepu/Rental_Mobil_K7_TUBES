@@ -7,10 +7,10 @@ import java.sql.SQLException;
 public class SQLDatabaseConnection {
 
     private static final String connectionUrl =
-            "jdbc:sqlserver://localhost:1433;"
+            "jdbc:sqlserver://localhost\\SQLEXPRESS;"
             + "databaseName=rental_mobil_kelompok7;"
             + "user=kelompok7;"
-            + "password=RentalMobil#2026;"
+            + "password=12345678;"
             + "encrypt=true;"
             + "trustServerCertificate=true;"
             + "loginTimeout=30;";

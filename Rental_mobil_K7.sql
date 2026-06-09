@@ -42,8 +42,12 @@ CREATE TABLE Cabang(
     jam_operasional TIME,
     email VARCHAR(100),
     no_telepon VARCHAR(20),
-    alamat VARCHAR(100)
+    alamat VARCHAR(100),
+    status VARCHAR(20)
 );
+
+-- Add status column to allow soft-deleting (Aktif/Nonaktif)
+--ALTER TABLE Cabang ADD status VARCHAR(20) DEFAULT 'Aktif';
 
 --Entitas Member
 CREATE TABLE Member(
@@ -216,13 +220,13 @@ VALUES
 
 --Cabang
 INSERT INTO Cabang
-(nama, jam_operasional, email, no_telepon, alamat)
+(nama, jam_operasional, email, no_telepon, alamat, status)
 VALUES
-('Cabang Jakarta', '08:00', 'cabang1@gmail.com', '0811111', 'Jakarta'),
-('Cabang Bekasi', '09:00', 'bekasi@gmail.com', '082222', 'Bekasi'),
-('Cabang Medan', '10:00', 'medan@gmail.com', '0833333', 'Medan'),
-('Cabang Cimahi', '09:00', 'cimahi@gmail.com', '0844444', 'Cimahi'),
-('Cabang Bandung', '11:00', 'bandung@gmail.com', '0855555', 'Bandung');
+('Cabang Jakarta', '08:00', 'cabang1@gmail.com', '0811111', 'Jakarta', 'Aktif'),
+('Cabang Bekasi', '09:00', 'bekasi@gmail.com', '082222', 'Bekasi', 'Aktif'),
+('Cabang Medan', '10:00', 'medan@gmail.com', '0833333', 'Medan', 'Aktif'),
+('Cabang Cimahi', '09:00', 'cimahi@gmail.com', '0844444', 'Cimahi', 'Aktif'),
+('Cabang Bandung', '11:00', 'bandung@gmail.com', '0855555', 'Bandung', 'Aktif');
 
 --Pegawai
 INSERT INTO Pegawai (id_user, id_jabatan, id_cabang, status)

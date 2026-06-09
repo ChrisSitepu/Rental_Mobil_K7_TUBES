@@ -52,7 +52,7 @@ public class KelolaCabangMenu {
 
     private List<Integer> tampilCabang() {
 
-        String sql = "SELECT id_cabang, nama FROM Cabang ORDER BY id_cabang";
+        String sql = "SELECT id_cabang, nama FROM Cabang WHERE status = 'Aktif' ORDER BY id_cabang";
 
         List<Integer> idList = new ArrayList<>();
 
@@ -264,7 +264,7 @@ public class KelolaCabangMenu {
 
     private void deleteCabang(int id) {
 
-        String sql = "DELETE FROM Cabang WHERE id_cabang = ?";
+        String sql = "UPDATE Cabang SET status = 'Nonaktif' WHERE id_cabang = ?";
 
         try (
             Connection conn = SQLDatabaseConnection.getConnection();
@@ -276,14 +276,14 @@ public class KelolaCabangMenu {
             int rows = ps.executeUpdate();
 
             if (rows > 0) {
-                System.out.println("Cabang berhasil dihapus!");
+                System.out.println("Cabang berhasil dinonaktifkan!");
             } else {
                 System.out.println("Cabang tidak ditemukan!");
             }
 
         } catch (SQLException e) {
             System.out.println(
-                "Cabang tidak dapat dihapus karena masih digunakan data lain."
+                "Cabang tidak dapat dinonaktifkan karena masih digunakan data lain."
             );
         }
     }

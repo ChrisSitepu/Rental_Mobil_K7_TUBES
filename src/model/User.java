@@ -12,12 +12,10 @@ public class User {
     private String nomorTelepon;
     private String alamat;
     private String noSim;
-
     private Role role;
-    private int idPegawai;
-    private int idMember;
     private int idCabang;
 
+    
     public User(
             int idUser,
             int idMember,
@@ -27,8 +25,25 @@ public class User {
             String email,
             String password,
             String nomorTelepon,
+            String alamat,
+            String noSim,
             Role role) {
 
+        this.idUser = idUser;
+        this.idMember = idMember;
+        this.idPegawai = idPegawai;
+        this.idCabang = idCabang;
+        this.nama = nama;
+        this.email = email;
+        this.password = password;
+        this.nomorTelepon = nomorTelepon;
+        this.alamat = alamat;
+        this.noSim = noSim;
+        this.role = role;
+    }
+
+    // Lightweight constructor for test/dummy users
+    public User(String nama, String email, String password, String nomorTelepon, Role role) {
         this.nama = nama;
         this.email = email;
         this.password = password;
@@ -93,12 +108,8 @@ public class User {
         return nomorTelepon;
     }
 
-    public String getAlamat() {
-        return alamat;
-    }
-
-    public String getNoSim() {
-        return noSim;
+    public int getCabang() {
+        return idCabang;
     }
 
     public Role getRole() {

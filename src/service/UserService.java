@@ -231,18 +231,49 @@ public class UserService {
     }
 
     public boolean deleteUserByEmail(String email) {
-        String sql = "DELETE FROM Users WHERE email = ?";
+        String findUser = "SELECT id_user FROM Users WHERE email = ?";
+        String updateMember = "UPDATE Member SET status = 'Nonaktif' WHERE id_user = ?";
+        String updatePegawai = "UPDATE Pegawai SET status = 'Nonaktif' WHERE id_user = ?";
 
-        try (Connection conn = SQLDatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+        Connection conn = null;
+        try {
+            conn = SQLDatabaseConnection.getConnection();
+            PreparedStatement psFind = conn.prepareStatement(findUser);
+            psFind.setString(1, email);
+            ResultSet rs = psFind.executeQuery();
 
-            stmt.setString(1, email);
+            if (!rs.next()) {
+                return false;
+            }
 
-            return stmt.executeUpdate() > 0;
+            int idUser = rs.getInt("id_user");
+
+            conn.setAutoCommit(false);
+            boolean updated = false;
+
+            try (PreparedStatement psMem = conn.prepareStatement(updateMember)) {
+                psMem.setInt(1, idUser);
+                if (psMem.executeUpdate() > 0) updated = true;
+            }
+
+            try (PreparedStatement psPeg = conn.prepareStatement(updatePegawai)) {
+                psPeg.setInt(1, idUser);
+                if (psPeg.executeUpdate() > 0) updated = true;
+            }
+
+            conn.commit();
+            return updated;
 
         } catch (SQLException e) {
-            System.out.println("Gagal menghapus: pastikan data member/pegawai terkait sudah dihapus.");
+            e.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
             return false;
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
         }
     }
 
