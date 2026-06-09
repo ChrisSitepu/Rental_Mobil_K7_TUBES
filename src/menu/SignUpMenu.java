@@ -1,7 +1,6 @@
 package menu;
 
 import java.util.Scanner;
-
 import service.AuthService;
 
 public class SignUpMenu {

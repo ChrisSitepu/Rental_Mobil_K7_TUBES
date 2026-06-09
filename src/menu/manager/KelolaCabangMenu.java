@@ -1,14 +1,13 @@
 package menu.manager;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import config.SQLDatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import config.SQLDatabaseConnection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class KelolaCabangMenu {
 
@@ -52,7 +51,7 @@ public class KelolaCabangMenu {
 
     private List<Integer> tampilCabang() {
 
-        String sql = "SELECT id_cabang, nama FROM Cabang WHERE status = 'Aktif' ORDER BY id_cabang";
+        String sql = "SELECT id_cabang, nama FROM Cabang ORDER BY id_cabang";
 
         List<Integer> idList = new ArrayList<>();
 
@@ -154,7 +153,7 @@ public class KelolaCabangMenu {
             System.out.println("3. Email");
             System.out.println("4. No Telepon");
             System.out.println("5. Alamat");
-            System.out.println("6. Hapus Cabang");
+            System.out.println("6. Edit Status Cabang");
             System.out.print("Pilih: ");
 
             int pilihan = sc.nextInt();

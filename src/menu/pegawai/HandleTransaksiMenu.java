@@ -160,7 +160,6 @@ package menu.pegawai;
 
 import java.util.ArrayList;
 import java.util.Scanner;
-
 import model.Transaksi;
 import service.TransaksiService;
 
@@ -188,10 +187,10 @@ public class HandleTransaksiMenu {
 
         for (int i = 0; i < list.size(); i++) {
 
-            for (int i = 0; i < list.size(); i++) {
-                Transaksi t = list.get(i);
+            for (int j = 0; j < list.size(); j++) {
+                Transaksi t = list.get(j);
                 System.out.println(
-                        (i + 1)
+                        (j + 1)
                         + ". "
                         + t.getNamaMobil()
                         + " - "
@@ -218,7 +217,7 @@ public class HandleTransaksiMenu {
 
         showDetail(list.get(pilih - 1));
         }
-
+        }
         }
 
 
@@ -334,3 +333,4 @@ public class HandleTransaksiMenu {
         sc.nextLine();
     }
 }
+

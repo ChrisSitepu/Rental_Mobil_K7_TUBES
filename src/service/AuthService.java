@@ -11,7 +11,7 @@ public class AuthService {
     public AuthResponse login(String email, String password) {
 
         String sql =
-            "SELECT
+            """
             SELECT
                 u.id_user,
                 m.id_member,
@@ -22,6 +22,7 @@ public class AuthService {
                 u.no_telp,
                 u.alamat,
                 m.id_member,
+                m.no_sim,
                 p.id_pegawai,
                 p.id_cabang,
                 j.nama_jabatan,

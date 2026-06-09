@@ -1,7 +1,6 @@
 package menu.pegawai;
 
 import java.util.Scanner;
-
 import model.User;
 
 public class ProfilePegawaiMenu {

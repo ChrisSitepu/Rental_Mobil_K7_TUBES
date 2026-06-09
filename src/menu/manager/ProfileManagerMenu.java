@@ -1,8 +1,7 @@
 package menu.manager;
 
-import model.User;
-
 import java.util.Scanner;
+import model.User;
 
 public class ProfileManagerMenu {
 

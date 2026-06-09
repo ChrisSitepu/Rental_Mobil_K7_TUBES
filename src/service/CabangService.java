@@ -1,20 +1,18 @@
 package service;
 
+import config.SQLDatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-
-import config.SQLDatabaseConnection;
 import model.Cabang;
 
 public class CabangService {
+
     public ArrayList<Cabang> getAllCabang() {
+        ArrayList<Cabang> cabangList = new ArrayList<>();
 
-    ArrayList<Cabang> cabangList = new ArrayList<>();
-
-    String sql =
-        "SELECT id_cabang, nama FROM Cabang";
+        String sql = "SELECT id_cabang, nama FROM Cabang";
 
     try (
         Connection conn = SQLDatabaseConnection.getConnection();

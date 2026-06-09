@@ -1,16 +1,15 @@
 package service;
 
 import config.SQLDatabaseConnection;
-import model.Role;
-import model.User;
-import model.Member;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import model.Member;
+import model.Role;
+import model.User;
 
 public class UserService {
 
@@ -265,15 +264,8 @@ public class UserService {
             return updated;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            if (conn != null) {
-                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
-            }
+            System.out.println("Gagal menghapus: pastikan data member/pegawai terkait sudah dihapus.");
             return false;
-        } finally {
-            if (conn != null) {
-                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
-            }
         }
     }
 

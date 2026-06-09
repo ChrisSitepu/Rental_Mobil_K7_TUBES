@@ -46,9 +46,6 @@ CREATE TABLE Cabang(
     status VARCHAR(20)
 );
 
--- Add status column to allow soft-deleting (Aktif/Nonaktif)
---ALTER TABLE Cabang ADD status VARCHAR(20) DEFAULT 'Aktif';
-
 --Entitas Member
 CREATE TABLE Member(
     id_member INT IDENTITY(1,1) PRIMARY KEY,
