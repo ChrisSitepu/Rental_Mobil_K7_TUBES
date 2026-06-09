@@ -4,22 +4,22 @@ GO
 USE rental_mobil_kelompok7;
 GO
 
-DROP TABLE IF EXISTS Users;
-DROP TABLE IF EXISTS Member;
-DROP TABLE IF EXISTS Jabatan;
-DROP TABLE IF EXISTS Pegawai;
-DROP TABLE IF EXISTS Cabang;
-DROP TABLE IF EXISTS Mobil;
-DROP TABLE IF EXISTS Peminjaman;
+DROP TABLE IF EXISTS Kondisi_Setelah_Sewa;
+DROP TABLE IF EXISTS Bertugas_Di;
+DROP TABLE IF EXISTS FotoKondisi;
 DROP TABLE IF EXISTS Pembayaran;
 DROP TABLE IF EXISTS KondisiMobil;
-DROP TABLE IF EXISTS FotoKondisi;
-DROP TABLE IF EXISTS Bertugas_Di;
-DROP TABLE IF EXISTS Kondisi_Setelah_Sewa;
+DROP TABLE IF EXISTS Peminjaman;
+DROP TABLE IF EXISTS Mobil;
+DROP TABLE IF EXISTS Pegawai;
+DROP TABLE IF EXISTS Member;
+DROP TABLE IF EXISTS Cabang;
+DROP TABLE IF EXISTS Jabatan;
+DROP TABLE IF EXISTS Users;
 
 
 --Entitas USER
-CREATE TABLE Users( --Fix
+CREATE TABLE Users(
     id_user INT IDENTITY(1,1) PRIMARY KEY,
     nama VARCHAR(100),
     email VARCHAR(100) UNIQUE,
@@ -29,8 +29,24 @@ CREATE TABLE Users( --Fix
     role VARCHAR(20)
 );
 
+--Entitas Jabatan
+CREATE TABLE Jabatan(
+    id_jabatan INT PRIMARY KEY,
+    nama_jabatan VARCHAR(50)
+);
+
+-- Entitas Cabang
+CREATE TABLE Cabang(
+    id_cabang INT IDENTITY(1,1) PRIMARY KEY,
+    nama VARCHAR(100),
+    jam_operasional TIME,
+    email VARCHAR(100),
+    no_telepon VARCHAR(20),
+    alamat VARCHAR(100)
+);
+
 --Entitas Member
-CREATE TABLE Member( --Fix
+CREATE TABLE Member(
     id_member INT IDENTITY(1,1) PRIMARY KEY,
     id_user INT UNIQUE,
     no_sim VARCHAR(30),
@@ -42,14 +58,8 @@ CREATE TABLE Member( --Fix
         REFERENCES Users(id_user)
 );
 
---Entitas Jabatan
-CREATE TABLE Jabatan( --Fix
-    id_jabatan INT PRIMARY KEY,
-    nama_jabatan VARCHAR(50)
-);
-
 --Entitas Pegawai
-CREATE TABLE Pegawai( --Fix
+CREATE TABLE Pegawai(
     id_pegawai INT IDENTITY(1,1) PRIMARY KEY,
     id_user INT UNIQUE,
     id_jabatan INT,
@@ -58,24 +68,16 @@ CREATE TABLE Pegawai( --Fix
 
     FOREIGN KEY(id_user)
         REFERENCES Users(id_user),
+
     FOREIGN KEY(id_jabatan)
         REFERENCES Jabatan(id_jabatan),
+
     FOREIGN KEY(id_cabang)
         REFERENCES Cabang(id_cabang)
 );
 
--- Entitas Cabang
-CREATE TABLE Cabang( --fix
-    id_cabang INT IDENTITY(1,1) PRIMARY KEY,
-    nama VARCHAR(100),
-    jam_operasional TIME,
-    email VARCHAR(100),
-    no_telepon VARCHAR(20),
-    alamat VARCHAR(100)
-);
-
 --Entitas Mobil
-CREATE TABLE Mobil( --fix
+CREATE TABLE Mobil(
 	id_mobil INT PRIMARY KEY,
     nama VARCHAR(100),
     tarif_sewa DECIMAL(12,2),
@@ -89,9 +91,9 @@ CREATE TABLE Mobil( --fix
 	tahun_pembuatan INT,
 	status VARCHAR(20),
 
-	FOREIGN KEY (id_cabang) REFERENCES Cabang(id_cabang)
+	FOREIGN KEY (id_cabang)
+        REFERENCES Cabang(id_cabang)
 );
-
 
 --Entitas Peminjaman
 CREATE TABLE Peminjaman(
@@ -109,9 +111,14 @@ CREATE TABLE Peminjaman(
 	total INT,
 	waktu_pinjam DATETIME,
 
-	FOREIGN KEY (id_mobil) REFERENCES Mobil(id_mobil),
-	FOREIGN KEY (id_cabang) REFERENCES Cabang(id_cabang),
-	FOREIGN KEY (id_member) REFERENCES Member(id_member)
+	FOREIGN KEY (id_mobil)
+        REFERENCES Mobil(id_mobil),
+
+	FOREIGN KEY (id_cabang)
+        REFERENCES Cabang(id_cabang),
+
+	FOREIGN KEY (id_member)
+        REFERENCES Member(id_member)
 );
 
 -- Entitas Pembayaran 
@@ -124,8 +131,11 @@ CREATE TABLE Pembayaran(
 	jumlah INT,
 	Metode VARCHAR(20),
 
-	FOREIGN KEY (id_transaksi) REFERENCES Peminjaman(id_transaksi),
-	FOREIGN KEY (id_pegawai) REFERENCES Pegawai (id_pegawai)
+	FOREIGN KEY (id_transaksi)
+        REFERENCES Peminjaman(id_transaksi),
+
+	FOREIGN KEY (id_pegawai)
+        REFERENCES Pegawai(id_pegawai)
 );
 
 -- Entitas Kondisi Mobil
@@ -138,8 +148,11 @@ CREATE TABLE KondisiMobil (
     deskripsi VARCHAR(255),
     tingkat_kondisi INT,
 
-    FOREIGN KEY (id_mobil) REFERENCES Mobil(id_mobil),
-    FOREIGN KEY (id_pegawai) REFERENCES Pegawai(id_pegawai)
+    FOREIGN KEY (id_mobil)
+        REFERENCES Mobil(id_mobil),
+
+    FOREIGN KEY (id_pegawai)
+        REFERENCES Pegawai(id_pegawai)
 );
 
 --Entitas Foto Kondisi
@@ -148,7 +161,8 @@ CREATE TABLE FotoKondisi(
 	id_catatan INT,
 	foto VARCHAR(255),
 
-	FOREIGN KEY (id_catatan) REFERENCES KondisiMobil (id_catatan)
+	FOREIGN KEY (id_catatan)
+        REFERENCES KondisiMobil(id_catatan)
 );
 
 --Relasi Bertugas_di
@@ -158,8 +172,11 @@ CREATE TABLE Bertugas_Di (
 
     PRIMARY KEY (id_pegawai, id_cabang),
 
-    FOREIGN KEY (id_pegawai) REFERENCES Pegawai(id_pegawai),
-    FOREIGN KEY (id_cabang) REFERENCES Cabang(id_cabang)
+    FOREIGN KEY (id_pegawai)
+        REFERENCES Pegawai(id_pegawai),
+
+    FOREIGN KEY (id_cabang)
+        REFERENCES Cabang(id_cabang)
 );
 
 --Relasi Kondisi_setelah_sewa
@@ -169,49 +186,33 @@ CREATE TABLE Kondisi_Setelah_Sewa (
 
     PRIMARY KEY (id_transaksi, id_catatan),
 
-    FOREIGN KEY (id_transaksi) REFERENCES Peminjaman(id_transaksi),
-    FOREIGN KEY (id_catatan) REFERENCES KondisiMobil(id_catatan)
+    FOREIGN KEY (id_transaksi)
+        REFERENCES Peminjaman(id_transaksi),
+
+    FOREIGN KEY (id_catatan)
+        REFERENCES KondisiMobil(id_catatan)
 );
 
 -- Users
 INSERT INTO Users (nama, email, no_telp, alamat, password, role)
 VALUES
-('manager',	'manager@gmail.com','081234567890',	'Jakarta','admin','MANAGER'),
-('pegawai',	'pegawai@gmail.com','081398765432',	'Ciumbuleuit','pegawai','PEGAWAI'),
-('Budi',	'budi@gmail.com',	'08214211',		'Kemayoran','budi123','PEGAWAI'),
-('Fajar',	'fajar@gmail.com',	'08124613',		'Cimahi','fajar123','PEGAWAI'),
-('Luna',	'luna@gmail.com',	'081461456',	'Kiaracondong','luna123','PEGAWAI'),
-('Citra',	'citra@gmail.com',	'08124444',		'Bekasi','citra123','PEGAWAI'),
-('member',	'member@gmail.com',	'0812345662',	'Bandung','member','MEMBER'),
-('Yosi',	'yosi@gmail.com',	'0815337892',	'Cijerah','yosi123','MEMBER'),
-('Kori',	'kori@gmail.com',	'08124627',		'Antapani','andi123','MEMBER'),
-('Dodo',	'dodo@gmail.com',	'08263162',		'Cempaka Putih','dodo123','MEMBER'),
-('Andi',	'andi@gmail.com',	'08121111',		'Depok','andi123','MEMBER');
+('manager', 'manager@gmail.com', '081234567890', 'Jakarta', 'admin', 'MANAGER'),
+('pegawai', 'pegawai@gmail.com', '081398765432', 'Ciumbuleuit', 'pegawai', 'PEGAWAI'),
+('Budi', 'budi@gmail.com', '08214211', 'Kemayoran', 'budi123', 'PEGAWAI'),
+('Fajar', 'fajar@gmail.com', '08124613', 'Cimahi', 'fajar123', 'PEGAWAI'),
+('Luna', 'luna@gmail.com', '081461456', 'Kiaracondong', 'luna123', 'PEGAWAI'),
+('Citra', 'citra@gmail.com', '08124444', 'Bekasi', 'citra123', 'PEGAWAI'),
+('member', 'member@gmail.com', '0812345662', 'Bandung', 'member', 'MEMBER'),
+('Yosi', 'yosi@gmail.com', '0815337892', 'Cijerah', 'yosi123', 'MEMBER'),
+('Kori', 'kori@gmail.com', '08124627', 'Antapani', 'andi123', 'MEMBER'),
+('Dodo', 'dodo@gmail.com', '08263162', 'Cempaka Putih', 'dodo123', 'MEMBER'),
+('Andi', 'andi@gmail.com', '08121111', 'Depok', 'andi123', 'MEMBER');
 
 -- Jabatan 
-INSERT INTO Jabatan 
+INSERT INTO Jabatan
 VALUES
-	(1, 'Manager'),
-	(2, 'Pegawai');
-
---Pegawai
-INSERT INTO Pegawai (id_user, id_jabatan, id_cabang, status)
-VALUES 
-	(1, 1, 1, 'Aktif'), -- Manager -> Jakarta
-    (2, 2, 1, 'Aktif'), -- Pegawai -> Jakarta
-	(3, 2, 2, 'Nonaktif'), -- Budi -> Bekasi
-	(4, 2, 3, 'Aktif'), -- Fajar -> Medan
-	(5, 2, 4, 'Aktif'), -- Luna -> Cimahi
-	(6, 2, 5, 'Nonaktif'); -- Citra -> Bandung
-
--- Member 
-INSERT INTO Member (id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status)
-VALUES 
-	(7, 'B123456', '2028-01-01', '2023-05-24', 'Aktif'),
-	(8, 'D889900', '2028-03-07', '2025-03-10', 'Aktif'),
-	(9, 'K902342', '2030-05-06', '2026-06-10', 'Nonaktif'),
-	(10, 'F667788', '2026-12-21', '2023-10-12', 'Aktif'),
-	(11, 'J124989', '2027-08-27', '2024-12-10', 'Nonaktif');
+(1, 'Manager'),
+(2, 'Pegawai');
 
 --Cabang
 INSERT INTO Cabang
@@ -222,6 +223,25 @@ VALUES
 ('Cabang Medan', '10:00', 'medan@gmail.com', '0833333', 'Medan'),
 ('Cabang Cimahi', '09:00', 'cimahi@gmail.com', '0844444', 'Cimahi'),
 ('Cabang Bandung', '11:00', 'bandung@gmail.com', '0855555', 'Bandung');
+
+--Pegawai
+INSERT INTO Pegawai (id_user, id_jabatan, id_cabang, status)
+VALUES 
+(1, 1, 1, 'Aktif'),
+(2, 2, 1, 'Aktif'),
+(3, 2, 2, 'Nonaktif'),
+(4, 2, 3, 'Aktif'),
+(5, 2, 4, 'Aktif'),
+(6, 2, 5, 'Nonaktif');
+
+-- Member 
+INSERT INTO Member (id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status)
+VALUES 
+(7, 'B123456', '2028-01-01', '2023-05-24', 'Aktif'),
+(8, 'D889900', '2028-03-07', '2025-03-10', 'Aktif'),
+(9, 'K902342', '2030-05-06', '2026-06-10', 'Nonaktif'),
+(10, 'F667788', '2026-12-21', '2023-10-12', 'Aktif'),
+(11, 'J124989', '2027-08-27', '2024-12-10', 'Nonaktif');
 
 --Mobil
 INSERT INTO Mobil (
@@ -267,12 +287,12 @@ VALUES
 
 INSERT INTO Bertugas_Di (id_pegawai, id_cabang)
 VALUES
-(1,1), -- Manager -> Jakarta
-(2,1), -- Pegawai -> Jakarta
-(3,2), -- Budi -> Bekasi
-(4,3), -- Fajar -> Medan
-(5,4), -- Luna -> Cimahi
-(6,5); -- Citra -> Bandung
+(1,1),
+(2,1),
+(3,2),
+(4,3),
+(5,4),
+(6,5);
 
 INSERT INTO KondisiMobil
 (id_catatan,id_mobil,id_pegawai,tipe_pencatatan,waktu_pencatatan,deskripsi,tingkat_kondisi)
