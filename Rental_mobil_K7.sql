@@ -1,6 +1,3 @@
-CREATE DATABASE rental_mobil_kelompok7;
-GO
-
 USE rental_mobil_kelompok7;
 GO
 
@@ -17,8 +14,8 @@ DROP TABLE IF EXISTS Cabang;
 DROP TABLE IF EXISTS Jabatan;
 DROP TABLE IF EXISTS Users;
 
-
 --Entitas USER
+--Menyimpan data akun pengguna sistem, baik member, pegawai, maupun manager.
 CREATE TABLE Users(
     id_user INT IDENTITY(1,1) PRIMARY KEY,
     nama VARCHAR(100),
@@ -30,12 +27,14 @@ CREATE TABLE Users(
 );
 
 --Entitas Jabatan
+--Menyimpan jenis jabatan pegawai, seperti Manager dan Pegawai.
 CREATE TABLE Jabatan(
     id_jabatan INT PRIMARY KEY,
     nama_jabatan VARCHAR(50)
 );
 
 -- Entitas Cabang
+--Menyimpan data cabang rental mobil.
 CREATE TABLE Cabang(
     id_cabang INT IDENTITY(1,1) PRIMARY KEY,
     nama VARCHAR(100),
@@ -47,6 +46,7 @@ CREATE TABLE Cabang(
 );
 
 --Entitas Member
+--Menyimpan data pelanggan yang melakukan penyewaan mobil.
 CREATE TABLE Member(
     id_member INT IDENTITY(1,1) PRIMARY KEY,
     id_user INT UNIQUE,
@@ -60,6 +60,7 @@ CREATE TABLE Member(
 );
 
 --Entitas Pegawai
+--Menyimpan data pegawai yang bekerja pada cabang tertentu.
 CREATE TABLE Pegawai(
     id_pegawai INT IDENTITY(1,1) PRIMARY KEY,
     id_user INT UNIQUE,
@@ -78,6 +79,7 @@ CREATE TABLE Pegawai(
 );
 
 --Entitas Mobil
+--Menyimpan data kendaraan yang tersedia pada setiap cabang.
 CREATE TABLE Mobil(
 	id_mobil INT PRIMARY KEY,
     nama VARCHAR(100),
@@ -97,6 +99,7 @@ CREATE TABLE Mobil(
 );
 
 --Entitas Peminjaman
+--Menyimpan transaksi peminjaman kendaraan oleh member.
 CREATE TABLE Peminjaman(
 	id_transaksi INT PRIMARY KEY,
 	id_mobil INT,
@@ -123,6 +126,7 @@ CREATE TABLE Peminjaman(
 );
 
 -- Entitas Pembayaran 
+--Menyimpan data pembayaran dari transaksi peminjaman.
 CREATE TABLE Pembayaran(
 	id_pembayaran INT PRIMARY KEY,
 	id_transaksi INT,
@@ -140,6 +144,7 @@ CREATE TABLE Pembayaran(
 );
 
 -- Entitas Kondisi Mobil
+--Menyimpan catatan kondisi kendaraan sebelum atau setelah disewa.
 CREATE TABLE KondisiMobil (
     id_catatan INT PRIMARY KEY,
     id_mobil INT,
@@ -157,6 +162,7 @@ CREATE TABLE KondisiMobil (
 );
 
 --Entitas Foto Kondisi
+--Menyimpan foto pendukung dari catatan kondisi mobil.
 CREATE TABLE FotoKondisi(
 	id_foto INT PRIMARY KEY,
 	id_catatan INT,
@@ -167,6 +173,7 @@ CREATE TABLE FotoKondisi(
 );
 
 --Relasi Bertugas_di
+--Menyimpan relasi pegawai dengan cabang tempat bertugas.
 CREATE TABLE Bertugas_Di (
     id_pegawai INT,
     id_cabang INT,
@@ -181,6 +188,7 @@ CREATE TABLE Bertugas_Di (
 );
 
 --Relasi Kondisi_setelah_sewa
+--Menyimpan relasi antara transaksi peminjaman dan catatan kondisi mobil setelah sewa.
 CREATE TABLE Kondisi_Setelah_Sewa (
     id_transaksi INT,
     id_catatan INT,
@@ -195,6 +203,7 @@ CREATE TABLE Kondisi_Setelah_Sewa (
 );
 
 -- Users
+--dijalankan ketika terdapat pengguna baru yang dibuat pada sistem. Data user dapat berupa manager, pegawai, maupun member.
 INSERT INTO Users (nama, email, no_telp, alamat, password, role)
 VALUES
 ('manager', 'manager@gmail.com', '081234567890', 'Jakarta', 'admin', 'MANAGER'),
@@ -210,12 +219,14 @@ VALUES
 ('Andi', 'andi@gmail.com', '08121111', 'Depok', 'andi123', 'MEMBER');
 
 -- Jabatan 
+--digunakan untuk memasukkan jenis jabatan yang tersedia pada sistem
 INSERT INTO Jabatan
 VALUES
 (1, 'Manager'),
 (2, 'Pegawai');
 
 --Cabang
+--digunakan untuk menambahkan data cabang rental mobil
 INSERT INTO Cabang
 (nama, jam_operasional, email, no_telepon, alamat, status)
 VALUES
@@ -226,6 +237,7 @@ VALUES
 ('Cabang Bandung', '11:00', 'bandung@gmail.com', '0855555', 'Bandung', 'Aktif');
 
 --Pegawai
+--digunakan untuk memasukkan data pegawai beserta jabatan dan cabang tempat pegawai bekerja
 INSERT INTO Pegawai (id_user, id_jabatan, id_cabang, status)
 VALUES 
 (1, 1, 1, 'Aktif'),
@@ -236,6 +248,7 @@ VALUES
 (6, 2, 5, 'Nonaktif');
 
 -- Member 
+--dijalankan setelah user berhasil didaftarkan sebagai member.
 INSERT INTO Member (id_user, no_sim, tanggal_berlaku_sim, tanggal_daftar, status)
 VALUES 
 (7, 'B123456', '2028-01-01', '2023-05-24', 'Aktif'),
@@ -245,6 +258,7 @@ VALUES
 (11, 'J124989', '2027-08-27', '2024-12-10', 'Nonaktif');
 
 --Mobil
+--digunakan untuk memasukkan data kendaraan yang tersedia pada cabang tertentu
 INSERT INTO Mobil (
     id_mobil,
     nama,
@@ -286,6 +300,8 @@ VALUES
 (24, 'Mercedes GLA', 2200000, 300000, 2, 'D5432MC', 'Mercedes', 'SUV', 'Hitam', 5, 2025, 'Tersedia'),
 (25, 'Tesla Model 3', 2500000, 350000, 3, 'B7777TS', 'Tesla', 'Sedan', 'Putih', 5, 2025, 'Tidak Tersedia');
 
+
+--digunakan untuk mencatat pegawai yang bertugas di cabang tertentu
 INSERT INTO Bertugas_Di (id_pegawai, id_cabang)
 VALUES
 (1,1),
@@ -295,6 +311,7 @@ VALUES
 (5,4),
 (6,5);
 
+--digunakan untuk mencatat kondisi kendaraan
 INSERT INTO KondisiMobil
 (id_catatan,id_mobil,id_pegawai,tipe_pencatatan,waktu_pencatatan,deskripsi,tingkat_kondisi)
 VALUES
@@ -307,6 +324,7 @@ VALUES
 (7,21,5,'Sebelum Sewa','2025-01-07 08:00','Cat masih bagus',91),
 (8,25,4,'Sebelum Sewa','2025-01-08 09:00','Mobil sangat prima',98);
 
+--digunakan untuk menyimpan foto dokumentasi kondisi mobil
 INSERT INTO FotoKondisi
 (id_foto,id_catatan,foto)
 VALUES
@@ -319,6 +337,7 @@ VALUES
 (7,7,'pajero1.jpg'),
 (8,8,'tesla1.jpg');
 
+--digunakan untuk mencatat transaksi peminjaman mobil oleh member
 INSERT INTO Peminjaman
 (id_transaksi,id_mobil,id_cabang,id_member,status,total_hari_sewa,
 catatan,biaya_keterlambatan,biaya_sewa,
@@ -366,6 +385,7 @@ VALUES
 (34,20,3,2,'Diproses',2,'-',0,1360000,'2026-06-13',NULL,1360000,'2026-06-11'),
 (35,22,5,4,'Diproses',1,'-',0,1500000,'2026-06-12',NULL,1500000,'2026-06-11');
 
+--digunakan untuk mencatat pembayaran transaksi peminjaman
 INSERT INTO Pembayaran
 (id_pembayaran,id_transaksi,id_pegawai,waktu_pembayaran,status,jumlah,Metode)
 SELECT
@@ -386,6 +406,7 @@ CASE
 END
 FROM Peminjaman;
 
+--digunakan untuk menghubungkan transaksi peminjaman dengan catatan kondisi mobi
 INSERT INTO Kondisi_Setelah_Sewa
 (id_transaksi,id_catatan)
 VALUES
